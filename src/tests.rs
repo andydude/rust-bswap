@@ -5,8 +5,10 @@ const LOREM_IPSUM: &'static [u8] = b"\t\n\n\tSed ut perspiciatis, unde omnis ist
 
 const MUSPI_MEROL: &'static [u8] = b"\t\n\n\t.talleper seroirepsa subirolod sidnerefrep tua rutauqesnoc saila seroiam subitatpulov sidneicier tua tu ,sutceled etneipas a rutenet cih murer murae euqati .eadnasucer non eaitselom te tnis eadnaiduper setatpulov te tu ,teineve epeas subitatissecen murer tua sitibed siiciffo tua te madsubiuq metua subiropmet .sudnelleper rolod sinmo ,tse adnemussa satpulov sinmo ,sumissop erecaf ,taecalp emixam douq ,di sunim ouq ,tidepmi lihin euqmuc ,oitpo idnegile tse sibon atulos muc ,eropmet orebil man .oitcnitsid atidepxe te tse silicaf murer mediuq murah te .aguf murolod te murobal tse di ,imina aitillom tnuresed aiciffo iuq ,apluc ni tnus euqilimis ,tnedivorp non etatidipuc itaceacbo ,tnis irutpecxe saitselom sauq te serolod souq ,itpurroc euqta itineled mutatpulov muitnesearp siitidnalb iuq ,sumicud somissingid oido otsui te sumasucca te soe orev tA\t\n\n\t?rutairap allun satpulov ouq ,taiguf mue merolod iuq ,mulli lev ,rutauqesnoc eaitselom lihin mauq ,esse tilev etatpulov ae ni iuq ,tiredneherper erui mue lev metua siuq ?rutauqesnoc idommoc ae xe diuqila tu isin ,masoirobal tipicsus siroproc mallu menoitaticrexe murtson siuq ,mainev aminim da mine tu .metatpulov tareauq mauqila mangam erolod te erobal tu ,tnudicni aropmet idom suie mauqmun non aiuq des ,tilev icsipida ,rutetcesnoc ,tema ,tis rolod aiuq ,muspi merolod iuq ,tse mauqsiuq orrop euqen ,tnuicsen iuqes metatpulov enoitar iuq ,soe serolod ingam rutnuuqesnoc aiuq des ,tiguf tua tido tua rutanrepsa ,tis satpulov aiuq ,metatpulov maspi mine omen .obacilpxe ,tnus atcid eativ eataeb otcetihcra isauq te sitatirev erotnevni olli ba eauq ,aspi euqae mairepa mer matot ,muitnadual euqmerolod muitnasucca metatpulov tis rorre sutan etsi sinmo ednu ,sitaicipsrep tu deS\t\n\n\t";
 
+const LOREM_IPSUM_160_U64_SWAP_MEMORY: &'static [u8] = b" deS\t\n\n\tpsrep tu,sitaicimo ednu etsi sine sutan tis rorratpulov ucca met muitnasqmerolodadual eut ,muitnmer matomairepa i euqae auq ,asplli ba etnevni oirev ero";
+
 #[test]
-fn test_reverse_memory_u8() {
+fn test_u8_reverse_memory_u8() {
     let mut dst = [0u8; 11];
     let src: &[u8] = b"hello world";
     unsafe {
@@ -18,7 +20,7 @@ fn test_reverse_memory_u8() {
 }
 
 #[test]
-fn test_reverse_memory_u64() {
+fn test_u8_reverse_memory_u64() {
     let mut dst = [0u8; 8];
     let src: &[u8] = b"hi world";
     unsafe {
@@ -30,7 +32,7 @@ fn test_reverse_memory_u64() {
 }
 
 #[test]
-fn test_reverse_memory_u8x16_lorem_ipsum() {
+fn test_u8_reverse_memory_u8x16_lorem_ipsum() {
     let mut dst = [0u8; 160];
     let src: &[u8] = &LOREM_IPSUM[..160];
     unsafe {
@@ -38,14 +40,14 @@ fn test_reverse_memory_u8x16_lorem_ipsum() {
             (&mut dst[..]).as_mut_ptr(),
             src.as_ptr(), src.len());
     }
-    println!("'{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
-    println!("'{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
-    println!("'{}'", String::from_utf8((&MUSPI_MEROL[1582..]).to_vec()).unwrap().as_slice());
+    println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
+    println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
+    println!("exp = '{}'", String::from_utf8((&MUSPI_MEROL[1582..]).to_vec()).unwrap().as_slice());
     assert_eq!(&dst[..], &MUSPI_MEROL[1582..]);
 }
 
 #[test]
-fn test_reverse_memory_lorem_ipsum() {
+fn test_u8_reverse_memory_lorem_ipsum() {
     let mut dst = [0u8; 1742];
     let src: &[u8] = LOREM_IPSUM;
     assert_eq!(dst.len(), LOREM_IPSUM.len());
@@ -59,7 +61,7 @@ fn test_reverse_memory_lorem_ipsum() {
 }
 
 #[test]
-fn test_reverse_memory_muspi_merol() {
+fn test_u8_reverse_memory_muspi_merol() {
     let mut dst = [0u8; 1742];
     let src: &[u8] = MUSPI_MEROL;
     assert_eq!(dst.len(), LOREM_IPSUM.len());
@@ -73,7 +75,7 @@ fn test_reverse_memory_muspi_merol() {
 }
 
 #[bench]
-fn bench_reverse_memory_lorem_ipsum(b: & mut Bencher) {
+fn bench_u8_reverse_memory_lorem_ipsum(b: & mut Bencher) {
     let mut dst = [0u8; 1742];
     let src: &[u8] = LOREM_IPSUM;
     b.iter(
@@ -89,7 +91,7 @@ fn bench_reverse_memory_lorem_ipsum(b: & mut Bencher) {
 }
 
 #[bench]
-fn bench_reverse_memory_muspi_merol(b: & mut Bencher) {
+fn bench_u8_reverse_memory_muspi_merol(b: & mut Bencher) {
     let mut dst = [0u8; 1742];
     let src: &[u8] = MUSPI_MEROL;
     b.iter(
@@ -105,7 +107,7 @@ fn bench_reverse_memory_muspi_merol(b: & mut Bencher) {
 }
 
 #[bench]
-fn bench_reverse_memory_ones_1k(b: & mut Bencher) {
+fn bench_u8_reverse_memory_ones_1000(b: & mut Bencher) {
     let mut dst = [0u8; 1000];
     let src = [1u8; 1000];
     b.iter(
@@ -121,7 +123,7 @@ fn bench_reverse_memory_ones_1k(b: & mut Bencher) {
 }
 
 #[bench]
-fn bench_reverse_memory_ones_1k24(b: & mut Bencher) {
+fn bench_u8_reverse_memory_ones_1024(b: & mut Bencher) {
     let mut dst = [0u8; 1024];
     let src = [1u8; 1024];
     b.iter(
@@ -134,4 +136,93 @@ fn bench_reverse_memory_ones_1k24(b: & mut Bencher) {
         }
     );
     b.bytes = src.len() as u64;
+}
+
+#[test]
+fn test_u64_swap_memory_hi() {
+    let mut dst = [0u8; 8];
+    let src: &[u8] = b"hi world";
+    unsafe {
+        super::u64::swap_memory(
+            (&mut dst[..]).as_mut_ptr(),
+            src.as_ptr(), src.len()/8);
+    }
+    println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
+    println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
+    assert_eq!(&dst[..], b"dlrow ih");
+}
+
+#[test]
+fn test_u64_swap_memory_inplace_hi() {
+    let mut dst = [0u8; 8];
+    let src: &[u8] = b"hi world";
+    ::std::slice::bytes::copy_memory(&mut dst, src);
+    unsafe {
+        super::u64::swap_memory_inplace(
+            (&mut dst[..]).as_mut_ptr(),
+            dst.len()/8);
+    }
+    println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
+    println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
+    assert_eq!(&dst[..], b"dlrow ih");
+}
+
+#[test]
+fn test_u64_swap_memory_pangram() {
+    let mut dst = [0u8; 32];
+    let src: &[u8] = b"Five boxing wizards jump quickly";
+    unsafe {
+        super::u64::swap_memory(
+            (&mut dst[..]).as_mut_ptr(),
+            src.as_ptr(), src.len()/8);
+    }
+    println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
+    println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
+    assert_eq!(&dst[..], b"xob eviFaziw gnipmuj sdrylkciuq ");
+}
+
+#[test]
+fn test_u64_swap_memory_inplace_pangram() {
+    let mut dst = [0u8; 32];
+    let src: &[u8] = b"Five boxing wizards jump quickly";
+    ::std::slice::bytes::copy_memory(&mut dst, src);
+    unsafe {
+        super::u64::swap_memory_inplace(
+            (&mut dst[..]).as_mut_ptr(),
+            dst.len()/8);
+    }
+    println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
+    println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
+    assert_eq!(&dst[..], b"xob eviFaziw gnipmuj sdrylkciuq ");
+}
+
+#[test]
+fn test_u64_swap_memory_lorem_ipsum() {
+    let mut dst = [0u8; 160];
+    let src: &[u8] = &LOREM_IPSUM[..160];
+    unsafe {
+        super::u64::swap_memory(
+            (&mut dst[..]).as_mut_ptr(),
+            src.as_ptr(), src.len()/8);
+    }
+    println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
+    println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
+    println!("exp = '{}'", String::from_utf8((LOREM_IPSUM_160_U64_SWAP_MEMORY).to_vec()).unwrap().as_slice());
+    assert_eq!(&dst[..], LOREM_IPSUM_160_U64_SWAP_MEMORY);
+}
+
+#[test]
+fn test_u64_swap_memory_inplace_lorem_ipsum() {
+    let mut dst = [0u8; 160];
+    let src: &[u8] = &LOREM_IPSUM[..160];
+    ::std::slice::bytes::copy_memory(&mut dst, src);
+    unsafe {
+        super::u64::swap_memory_inplace(
+            (&mut dst[..]).as_mut_ptr(),
+            dst.len()/8);
+    }
+    println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
+    println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
+    println!("exp = '{}'", String::from_utf8((LOREM_IPSUM_160_U64_SWAP_MEMORY).to_vec()).unwrap().as_slice());
+    assert_eq!(&dst[..], LOREM_IPSUM_160_U64_SWAP_MEMORY);
 }
