@@ -11,8 +11,8 @@ fn test_reverse_memory_u8() {
     let src: &[u8] = b"hello world";
     unsafe {
         super::u8::reverse_memory(
-            (&mut dst[..]).get_unchecked_mut(0),
-            src.get_unchecked(0), src.len());
+            (&mut dst[..]).as_mut_ptr(),
+            src.as_ptr(), src.len());
     }
     assert_eq!(&dst[..], b"dlrow olleh");
 }
@@ -23,10 +23,25 @@ fn test_reverse_memory_u64() {
     let src: &[u8] = b"hi world";
     unsafe {
         super::u8::reverse_memory(
-            (&mut dst[..]).get_unchecked_mut(0),
-            src.get_unchecked(0), src.len());
+            (&mut dst[..]).as_mut_ptr(),
+            src.as_ptr(), src.len());
     }
     assert_eq!(&dst[..], b"dlrow ih");
+}
+
+#[test]
+fn test_reverse_memory_u8x16_lorem_ipsum() {
+    let mut dst = [0u8; 160];
+    let src: &[u8] = &LOREM_IPSUM[..160];
+    unsafe {
+        super::u8::reverse_memory(
+            (&mut dst[..]).as_mut_ptr(),
+            src.as_ptr(), src.len());
+    }
+    println!("'{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
+    println!("'{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
+    println!("'{}'", String::from_utf8((&MUSPI_MEROL[1582..]).to_vec()).unwrap().as_slice());
+    assert_eq!(&dst[..], &MUSPI_MEROL[1582..]);
 }
 
 #[test]
@@ -37,8 +52,8 @@ fn test_reverse_memory_lorem_ipsum() {
     assert_eq!(dst.len(), MUSPI_MEROL.len());
     unsafe {
         super::u8::reverse_memory(
-            (&mut dst[..]).get_unchecked_mut(0),
-            src.get_unchecked(0), src.len());
+            (&mut dst[..]).as_mut_ptr(),
+            src.as_ptr(), src.len());
     }
     assert_eq!(&dst[..], MUSPI_MEROL);
 }
@@ -51,22 +66,22 @@ fn test_reverse_memory_muspi_merol() {
     assert_eq!(dst.len(), MUSPI_MEROL.len());
     unsafe {
         super::u8::reverse_memory(
-            (&mut dst[..]).get_unchecked_mut(0),
-            src.get_unchecked(0), src.len());
+            (&mut dst[..]).as_mut_ptr(),
+            src.as_ptr(), src.len());
     }
     assert_eq!(&dst[..], LOREM_IPSUM);
 }
 
 #[bench]
-fn bench_reverse_memory_fw(b: & mut Bencher) {
+fn bench_reverse_memory_lorem_ipsum(b: & mut Bencher) {
     let mut dst = [0u8; 1742];
     let src: &[u8] = LOREM_IPSUM;
     b.iter(
         || {
             unsafe {
                 super::u8::reverse_memory(
-                    (&mut dst[..]).get_unchecked_mut(0),
-                    src.get_unchecked(0), src.len());
+                    (&mut dst[..]).as_mut_ptr(),
+                    src.as_ptr(), src.len());
             }
         }
     );
@@ -74,15 +89,47 @@ fn bench_reverse_memory_fw(b: & mut Bencher) {
 }
 
 #[bench]
-fn bench_reverse_memory_bw(b: & mut Bencher) {
+fn bench_reverse_memory_muspi_merol(b: & mut Bencher) {
     let mut dst = [0u8; 1742];
     let src: &[u8] = MUSPI_MEROL;
     b.iter(
         || {
             unsafe {
                 super::u8::reverse_memory(
-                    (&mut dst[..]).get_unchecked_mut(0),
-                    src.get_unchecked(0), src.len());
+                    (&mut dst[..]).as_mut_ptr(),
+                    src.as_ptr(), src.len());
+            }
+        }
+    );
+    b.bytes = src.len() as u64;
+}
+
+#[bench]
+fn bench_reverse_memory_ones_1k(b: & mut Bencher) {
+    let mut dst = [0u8; 1000];
+    let src = [1u8; 1000];
+    b.iter(
+        || {
+            unsafe {
+                super::u8::reverse_memory(
+                    (&mut dst[..]).as_mut_ptr(),
+                    (&src[..]).as_ptr(), src.len());
+            }
+        }
+    );
+    b.bytes = src.len() as u64;
+}
+
+#[bench]
+fn bench_reverse_memory_ones_1k24(b: & mut Bencher) {
+    let mut dst = [0u8; 1024];
+    let src = [1u8; 1024];
+    b.iter(
+        || {
+            unsafe {
+                super::u8::reverse_memory(
+                    (&mut dst[..]).as_mut_ptr(),
+                    (&src[..]).as_ptr(), src.len());
             }
         }
     );
