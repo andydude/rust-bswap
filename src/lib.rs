@@ -23,7 +23,7 @@ pub mod u8 {
                       b.offset((len - 1 - i) as isize));
         }
     }
-    
+
     /// TODO
     pub unsafe fn reverse_memory(dst: *mut u8, src: *const u8, len: usize) {
         let (mut d, mut s) = (dst, src);
@@ -48,7 +48,7 @@ pub mod u16 {
             b = b.offset(2);
         }
     }
-    
+
     /// TODO
     pub unsafe fn swap_memory(dst: *mut u8, src: *const u8, len: usize) {
         let (mut d, mut s) = (dst, src);
@@ -171,7 +171,7 @@ pub mod u32 {
     use std::num::Int;
     use std::ptr;
     use std::cmp;
-    
+
     /// Swaps `len*4` bytes for `u32` objects inplace in `buf`.
     ///
     ///
@@ -193,13 +193,13 @@ pub mod u32 {
                 b = b.offset(1);
             }
         }
-        
+
         match super::u8::align_of_ptr(buf) {
             4 => u32_swap_memory_inplace_u32(buf, len),
             _ => u32_swap_memory_inplace_u8(buf, len),
         }
     }
-    
+
 
     /// Swaps `len*4` bytes for `u32` objects from `src` to `dst`. The source and destination may not overlap.
     ///
@@ -241,7 +241,7 @@ pub mod u64 {
     use std::num::Int;
     use std::ptr;
     use std::cmp;
-    
+
     /// Swaps `len*8` bytes for `u64` objects inplace in `buf`.
     ///
     ///
@@ -265,13 +265,13 @@ pub mod u64 {
                 b = b.offset(1);
             }
         }
-        
+
         match super::u8::align_of_ptr(buf) {
             8 => u64_swap_memory_inplace_u64(buf, len),
             _ => u64_swap_memory_inplace_u8(buf, len),
         }
     }
-    
+
 
     /// Swaps `len*8` bytes for `u64` objects from `src` to `dst`. The source and destination may not overlap.
     ///
@@ -312,6 +312,39 @@ pub mod u64 {
     }
 }
 
+pub mod beunknown {
+    use std::num::Int;
+    use std::ptr;
+
+    pub fn decode(buf: &[u8], nbytes: u8) -> u64 {
+        assert_eq!(buf.len(), nbytes);
+        let mut out = [0u8; 8];
+        let ptr_out = out.as_mut_ptr();
+        unsafe {
+            ptr::copy_nonoverlapping_memory(
+                ptr_out.offset((8 - nbytes) as isize),
+                buf.as_ptr(), nbytes);
+            (*(ptr_out as *const u64)).to_be()
+        }
+    }
+}
+
+pub mod leunknown {
+    use std::num::Int;
+    use std::ptr;
+
+    pub fn decode(buf: &[u8], nbytes: u8) -> u64 {
+        assert_eq!(buf.len(), nbytes);
+        let mut out = [0u8; 8];
+        let ptr_out = out.as_mut_ptr();
+        unsafe {
+            ptr::copy_nonoverlapping_memory(
+                ptr_out, buf.as_ptr(), nbytes);
+            (*(ptr_out as *const u64)).to_le()
+        }
+    }
+}
+
 
 macro_rules! mod_odd_impls {
     ($I:ident, $T:ident, $S:ident, $Bytes:expr, $E:expr, $NotE:expr) => {
@@ -336,7 +369,7 @@ macro_rules! mod_odd_impls {
                 Int::from_le(tmp)
             }
         }
-        
+
         /// Decodes $E-endian bytes to a slice of native-endian $T objects.
         pub fn decode_slice(dst: &mut [[u8; $Bytes]], src: &[u8]) {
             assert_eq!(dst.len()*$Bytes, src.len());
@@ -344,7 +377,7 @@ macro_rules! mod_odd_impls {
                 swap_memory(dst.as_mut_ptr() as *mut u8, src.as_ptr(), dst.len());
             }
         }
-        
+
         /// Encodes a native-endian $T object to $E-endian bytes.
         pub fn encode(dst: &mut [u8], src: $S) {
             assert_eq!(dst.len(), $Bytes);
@@ -353,7 +386,7 @@ macro_rules! mod_odd_impls {
                 ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), &tmp as *const _ as *const u8, $Bytes);
             }
         }
-        
+
         /// Encodes a slice of native-endian $T objects to $E-endian bytes.
         pub fn encode_slice(dst: &mut [u8], src: &[[u8; $Bytes]]) {
             assert_eq!(dst.len(), src.len()*$Bytes);
@@ -388,7 +421,7 @@ macro_rules! mod_std_impls {
                 Int::from_le(tmp)
             }
         }
-        
+
         /// Decodes $E-endian bytes to a slice of native-endian $T objects.
         pub fn decode_slice(dst: &mut [$T], src: &[u8]) {
             assert_eq!(dst.len()*::std::$T::BYTES, src.len());
@@ -396,7 +429,7 @@ macro_rules! mod_std_impls {
                 swap_memory(dst.as_mut_ptr() as *mut u8, src.as_ptr(), dst.len());
             }
         }
-        
+
         /// Encodes a native-endian $T object to $E-endian bytes.
         pub fn encode(dst: &mut [u8], src: $T) {
             assert_eq!(dst.len(), ::std::$T::BYTES);
@@ -405,7 +438,7 @@ macro_rules! mod_std_impls {
                 ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), &tmp as *const _ as *const u8, ::std::$T::BYTES);
             }
         }
-        
+
         /// Encodes a slice of native-endian $T objects to $E-endian bytes.
         pub fn encode_slice(dst: &mut [u8], src: &[$T]) {
             assert_eq!(dst.len(), src.len()*::std::$T::BYTES);
