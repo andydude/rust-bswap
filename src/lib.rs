@@ -332,8 +332,8 @@ pub mod beunknown {
     pub fn encode(dst: &mut [u8], src: u64, nbytes: usize) {
         assert!(dst.len() >= nbytes);
         unsafe {
-            let bytes = (&mem::transmute::<_, [u8; 8]>(src.to_be())).as_ptr();
-            ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), &bytes[8 - nbytes..], nbytes);
+            let bytes: &[u8; 8] = &mem::transmute::<_, [u8; 8]>(src.to_be());
+            ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), (&bytes[8 - nbytes..]).as_ptr(), nbytes);
         }
     }
 }
@@ -357,8 +357,8 @@ pub mod leunknown {
     pub fn encode(dst: &mut [u8], src: u64, nbytes: usize) {
         assert!(dst.len() >= nbytes);
         unsafe {
-            let bytes = (&mem::transmute::<_, [u8; 8]>(src.to_be())).as_ptr();
-            ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), &bytes[..nbytes], nbytes);
+            let bytes: &[u8; 8] = &mem::transmute::<_, [u8; 8]>(src.to_be());
+            ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), (&bytes[..nbytes]).as_ptr(), nbytes);
         }
     }
 }
