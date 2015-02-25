@@ -318,7 +318,7 @@ pub mod beunknown {
     use std::ptr;
 
     pub fn decode(src: &[u8], nbytes: usize) -> u64 {
-        //assert_eq!(src.len(), nbytes);
+        assert!(src.len() >= nbytes);
         let mut dst = [0u8; 8];
         let ptr_out = dst.as_mut_ptr();
         unsafe {
@@ -329,6 +329,7 @@ pub mod beunknown {
         }
     }
     pub fn encode(dst: &mut [u8], src: u64, nbytes: usize) {
+        assert!(dst.len() >= nbytes);
         unsafe {
             let bytes = (&mem::transmute::<_, [u8; 8]>(src.to_be())).as_ptr();
             ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), bytes, nbytes);
@@ -342,7 +343,7 @@ pub mod leunknown {
     use std::ptr;
 
     pub fn decode(src: &[u8], nbytes: usize) -> u64 {
-        //assert_eq!(src.len(), nbytes);
+        assert!(src.len() >= nbytes);
         let mut dst = [0u8; 8];
         let ptr_out = dst.as_mut_ptr();
         unsafe {
@@ -352,6 +353,7 @@ pub mod leunknown {
         }
     }
     pub fn encode(dst: &mut [u8], src: u64, nbytes: usize) {
+        assert!(dst.len() >= nbytes);
         unsafe {
             let bytes = (&mem::transmute::<_, [u8; 8]>(src.to_be())).as_ptr();
             ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), bytes, nbytes);
@@ -376,7 +378,7 @@ macro_rules! mod_odd_impls {
 
         /// Decodes $E-endian bytes to a native-endian $T object.
         pub fn decode(buf: &[u8]) -> $S {
-            //assert_eq!(buf.len(), $Bytes);
+            assert!(buf.len() >= $Bytes);
             unsafe {
                 let mut tmp: $S = mem::uninitialized();
                 ptr::copy_nonoverlapping_memory(&mut tmp as *mut _ as *mut u8, buf.as_ptr(), $Bytes);
@@ -386,7 +388,7 @@ macro_rules! mod_odd_impls {
 
         /// Decodes $E-endian bytes to a slice of native-endian $T objects.
         pub fn decode_slice(dst: &mut [[u8; $Bytes]], src: &[u8]) {
-            //assert_eq!(dst.len()*$Bytes, src.len());
+            assert!(dst.len()*$Bytes >= src.len());
             unsafe {
                 swap_memory(dst.as_mut_ptr() as *mut u8, src.as_ptr(), dst.len());
             }
@@ -394,7 +396,7 @@ macro_rules! mod_odd_impls {
 
         /// Encodes a native-endian $T object to $E-endian bytes.
         pub fn encode(dst: &mut [u8], src: $S) {
-            //assert_eq!(dst.len(), $Bytes);
+            assert!(dst.len() >= $Bytes);
             unsafe {
                 let tmp: $S = src.to_le();
                 ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), &tmp as *const _ as *const u8, $Bytes);
@@ -403,7 +405,7 @@ macro_rules! mod_odd_impls {
 
         /// Encodes a slice of native-endian $T objects to $E-endian bytes.
         pub fn encode_slice(dst: &mut [u8], src: &[[u8; $Bytes]]) {
-            //assert_eq!(dst.len(), src.len()*$Bytes);
+            assert!(dst.len() >= src.len()*$Bytes);
             unsafe {
                 swap_memory(dst.as_mut_ptr(), src.as_ptr() as *const u8, src.len());
             }
@@ -428,7 +430,7 @@ macro_rules! mod_std_impls {
 
         /// Decodes $E-endian bytes to a native-endian $T object.
         pub fn decode(buf: &[u8]) -> $T {
-            //assert_eq!(buf.len(), ::std::$T::BYTES);
+            assert!(buf.len() >= ::std::$T::BYTES);
             unsafe {
                 let mut tmp: $T = mem::uninitialized();
                 ptr::copy_nonoverlapping_memory(&mut tmp as *mut _ as *mut u8, buf.as_ptr(), ::std::$T::BYTES);
@@ -438,7 +440,7 @@ macro_rules! mod_std_impls {
 
         /// Decodes $E-endian bytes to a slice of native-endian $T objects.
         pub fn decode_slice(dst: &mut [$T], src: &[u8]) {
-            //assert_eq!(dst.len()*::std::$T::BYTES, src.len());
+            assert!(dst.len()*::std::$T::BYTES >= src.len());
             unsafe {
                 swap_memory(dst.as_mut_ptr() as *mut u8, src.as_ptr(), dst.len());
             }
@@ -446,7 +448,7 @@ macro_rules! mod_std_impls {
 
         /// Encodes a native-endian $T object to $E-endian bytes.
         pub fn encode(dst: &mut [u8], src: $T) {
-            //assert_eq!(dst.len(), ::std::$T::BYTES);
+            assert!(dst.len() >= ::std::$T::BYTES);
             unsafe {
                 let tmp: $T = src.to_le();
                 ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), &tmp as *const _ as *const u8, ::std::$T::BYTES);
@@ -455,7 +457,7 @@ macro_rules! mod_std_impls {
 
         /// Encodes a slice of native-endian $T objects to $E-endian bytes.
         pub fn encode_slice(dst: &mut [u8], src: &[$T]) {
-            //assert_eq!(dst.len(), src.len()*::std::$T::BYTES);
+            assert!(dst.len() >= src.len()*::std::$T::BYTES);
             unsafe {
                 swap_memory(dst.as_mut_ptr(), src.as_ptr() as *const u8, src.len());
             }
