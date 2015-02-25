@@ -174,9 +174,9 @@ pub mod u56 {
 
 /// Swap bytes for `u32` objects on all targets.
 pub mod u32 {
+    use std::cmp;
     use std::num::Int;
     use std::ptr;
-    use std::cmp;
     pub const BYTES: usize = 4;
 
 
@@ -246,9 +246,9 @@ pub mod u32 {
 
 /// Swap bytes for `u64` objects on all targets.
 pub mod u64 {
+    use std::cmp;
     use std::num::Int;
     use std::ptr;
-    use std::cmp;
     pub const BYTES: usize = 7;
 
     /// Swaps `len*8` bytes for `u64` objects inplace in `buf`.
@@ -377,7 +377,7 @@ pub mod leunknown {
 
 
 macro_rules! mod_odd_impls {
-    ($I:ident, $T:ident, $S:ident, $Bytes:expr, $E:expr, $NotE:expr) => {
+    ($I:ident, $T:ident, $S:ident, $Bytes:expr, $DFunc:ident, $EMeth:ident, $E:expr, $NotE:expr) => {
         use std::mem;
         use std::num::Int;
         use std::ptr;
@@ -396,7 +396,7 @@ macro_rules! mod_odd_impls {
             unsafe {
                 let mut tmp: $S = mem::uninitialized();
                 ptr::copy_nonoverlapping_memory(&mut tmp as *mut _ as *mut u8, buf.as_ptr(), $Bytes);
-                Int::from_le(tmp)
+                Int::$DFunc(tmp)
             }
         }
 
@@ -412,7 +412,7 @@ macro_rules! mod_odd_impls {
         pub fn encode(dst: &mut [u8], src: $S) {
             assert!(dst.len() >= $Bytes);
             unsafe {
-                let tmp: $S = src.to_le();
+                let tmp: $S = src.$EMeth();
                 ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), &tmp as *const _ as *const u8, $Bytes);
             }
         }
@@ -429,7 +429,7 @@ macro_rules! mod_odd_impls {
 }
 
 macro_rules! mod_std_impls {
-    ($I:ident, $T:ident, $E:expr, $NotE:expr) => {
+    ($I:ident, $T:ident, $DFunc:ident, $EMeth:ident, $E:expr, $NotE:expr) => {
         use std::mem;
         use std::num::Int;
         use std::ptr;
@@ -448,7 +448,7 @@ macro_rules! mod_std_impls {
             unsafe {
                 let mut tmp: $T = mem::uninitialized();
                 ptr::copy_nonoverlapping_memory(&mut tmp as *mut _ as *mut u8, buf.as_ptr(), ::std::$T::BYTES);
-                Int::from_le(tmp)
+                Int::$DFunc(tmp)
             }
         }
 
@@ -464,7 +464,7 @@ macro_rules! mod_std_impls {
         pub fn encode(dst: &mut [u8], src: $T) {
             assert!(dst.len() >= ::std::$T::BYTES);
             unsafe {
-                let tmp: $T = src.to_le();
+                let tmp: $T = src.$EMeth();
                 ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), &tmp as *const _ as *const u8, ::std::$T::BYTES);
             }
         }
@@ -481,32 +481,32 @@ macro_rules! mod_std_impls {
 }
 
 /// Swap bytes for `[u8; 3]` objects only on little-endian targets, does nothing on big-endian targets.
-pub mod beu24 { mod_odd_impls!(be, u24, u32, 3, "big", "little"); }
+pub mod beu24 { mod_odd_impls!(be, u24, u32, 3, from_be, to_be, "big", "little"); }
 /// Swap bytes for `[u8; 5]` objects only on little-endian targets, does nothing on big-endian targets.
-pub mod beu40 { mod_odd_impls!(be, u40, u64, 5, "big", "little"); }
+pub mod beu40 { mod_odd_impls!(be, u40, u64, 5, from_be, to_be, "big", "little"); }
 /// Swap bytes for `[u8; 6]` objects only on little-endian targets, does nothing on big-endian targets.
-pub mod beu48 { mod_odd_impls!(be, u48, u64, 6, "big", "little"); }
+pub mod beu48 { mod_odd_impls!(be, u48, u64, 6, from_be, to_be, "big", "little"); }
 /// Swap bytes for `[u8; 7]` objects only on little-endian targets, does nothing on big-endian targets.
-pub mod beu56 { mod_odd_impls!(be, u56, u64, 7, "big", "little"); }
+pub mod beu56 { mod_odd_impls!(be, u56, u64, 7, from_be, to_be, "big", "little"); }
 /// Swap bytes for `[u8; 3]` objects only on big-endian targets, does nothing on little-endian targets.
-pub mod leu24 { mod_odd_impls!(le, u24, u32, 3, "little", "big"); }
+pub mod leu24 { mod_odd_impls!(le, u24, u32, 3, from_le, to_le, "little", "big"); }
 /// Swap bytes for `[u8; 5]` objects only on big-endian targets, does nothing on little-endian targets.
-pub mod leu40 { mod_odd_impls!(le, u40, u64, 5, "little", "big"); }
+pub mod leu40 { mod_odd_impls!(le, u40, u64, 5, from_le, to_le, "little", "big"); }
 /// Swap bytes for `[u8; 6]` objects only on big-endian targets, does nothing on little-endian targets.
-pub mod leu48 { mod_odd_impls!(le, u48, u64, 6, "little", "big"); }
+pub mod leu48 { mod_odd_impls!(le, u48, u64, 6, from_le, to_le, "little", "big"); }
 /// Swap bytes for `[u8; 7]` objects only on big-endian targets, does nothing on little-endian targets.
-pub mod leu56 { mod_odd_impls!(le, u56, u64, 7, "little", "big"); }
+pub mod leu56 { mod_odd_impls!(le, u56, u64, 7, from_le, to_le, "little", "big"); }
 /// Swap bytes for `u16` objects only on little-endian targets, does nothing on big-endian targets.
-pub mod beu16 { mod_std_impls!(be, u16, "big", "little"); }
+pub mod beu16 { mod_std_impls!(be, u16, from_be, to_be, "big", "little"); }
 /// Swap bytes for `u16` objects only on big-endian targets, does nothing on little-endian targets.
-pub mod leu16 { mod_std_impls!(le, u16, "little", "big"); }
+pub mod leu16 { mod_std_impls!(le, u16, from_le, to_le, "little", "big"); }
 /// Swap bytes for `u32` objects only on little-endian targets, does nothing on big-endian targets.
-pub mod beu32 { mod_std_impls!(be, u32, "big", "little"); }
+pub mod beu32 { mod_std_impls!(be, u32, from_be, to_be, "big", "little"); }
 /// Swap bytes for `u32` objects only on big-endian targets, does nothing on little-endian targets.
-pub mod leu32 { mod_std_impls!(le, u32, "little", "big"); }
+pub mod leu32 { mod_std_impls!(le, u32, from_le, to_le, "little", "big"); }
 /// Swap bytes for `u64` objects only on little-endian targets, does nothing on big-endian targets.
-pub mod beu64 { mod_std_impls!(be, u64, "big", "little"); }
+pub mod beu64 { mod_std_impls!(be, u64, from_be, to_be, "big", "little"); }
 /// Swap bytes for `u64` objects only on big-endian targets, does nothing on little-endian targets.
-pub mod leu64 { mod_std_impls!(le, u64, "little", "big"); }
+pub mod leu64 { mod_std_impls!(le, u64, from_le, to_le, "little", "big"); }
 
 mod tests;
