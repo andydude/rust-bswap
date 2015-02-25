@@ -6,6 +6,7 @@ pub mod u8 {
     use std::mem;
     use std::num::Int;
     use std::ptr;
+    pub const BYTES: usize = 1;
 
     /// TODO
     pub unsafe fn align_of_ptr(src: *const u8) -> usize {
@@ -39,6 +40,7 @@ pub mod u8 {
 /// Swap bytes for `u16` objects on all targets.
 pub mod u16 {
     use std::ptr;
+    pub const BYTES: usize = 2;
 
     /// TODO
     pub unsafe fn swap_memory_inplace(buf: *mut u8, len: usize) {
@@ -64,6 +66,7 @@ pub mod u16 {
 /// Swap bytes for `[u8; 3]` objects on all targets.
 pub mod u24 {
     use std::ptr;
+    pub const BYTES: usize = 3;
     pub unsafe fn swap_memory_inplace(buf: *mut u8, len: usize) {
         let mut b = buf;
         for _ in 0..len {
@@ -87,6 +90,7 @@ pub mod u24 {
 /// Swap bytes for `[u8; 5]` objects on all targets.
 pub mod u40 {
     use std::ptr;
+    pub const BYTES: usize = 5;
     pub unsafe fn swap_memory_inplace(buf: *mut u8, len: usize) {
         let mut b = buf;
         for _ in 0..len {
@@ -113,6 +117,7 @@ pub mod u40 {
 /// Swap bytes for `[u8; 6]` objects on all targets.
 pub mod u48 {
     use std::ptr;
+    pub const BYTES: usize = 6;
     pub unsafe fn swap_memory_inplace(buf: *mut u8, len: usize) {
         let mut b = buf;
         for _ in 0..len {
@@ -140,6 +145,7 @@ pub mod u48 {
 /// Swap bytes for `[u8; 7]` objects on all targets.
 pub mod u56 {
     use std::ptr;
+    pub const BYTES: usize = 7;
     pub unsafe fn swap_memory_inplace(buf: *mut u8, len: usize) {
         let mut b = buf;
         for _ in 0..len {
@@ -171,6 +177,8 @@ pub mod u32 {
     use std::num::Int;
     use std::ptr;
     use std::cmp;
+    pub const BYTES: usize = 4;
+
 
     /// Swaps `len*4` bytes for `u32` objects inplace in `buf`.
     ///
@@ -241,6 +249,7 @@ pub mod u64 {
     use std::num::Int;
     use std::ptr;
     use std::cmp;
+    pub const BYTES: usize = 7;
 
     /// Swaps `len*8` bytes for `u64` objects inplace in `buf`.
     ///
@@ -331,9 +340,11 @@ pub mod beunknown {
     }
     pub fn encode(dst: &mut [u8], src: u64, nbytes: usize) {
         assert!(dst.len() >= nbytes);
+        assert!(0 < nbytes && nbytes < 9);
         unsafe {
             let bytes: &[u8; 8] = &mem::transmute::<_, [u8; 8]>(src.to_be());
-            ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), (&bytes[8 - nbytes..]).as_ptr(), nbytes);
+            ptr::copy_nonoverlapping_memory(
+                dst.as_mut_ptr(), (&bytes[8 - nbytes..]).as_ptr(), nbytes);
         }
     }
 }
@@ -356,8 +367,9 @@ pub mod leunknown {
     }
     pub fn encode(dst: &mut [u8], src: u64, nbytes: usize) {
         assert!(dst.len() >= nbytes);
+        assert!(0 < nbytes && nbytes < 9);
         unsafe {
-            let bytes: &[u8; 8] = &mem::transmute::<_, [u8; 8]>(src.to_be());
+            let bytes: &[u8; 8] = &mem::transmute::<_, [u8; 8]>(src.to_le());
             ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), (&bytes[..nbytes]).as_ptr(), nbytes);
         }
     }
