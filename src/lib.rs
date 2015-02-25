@@ -9,12 +9,14 @@ pub mod u8 {
     pub const BYTES: usize = 1;
 
     /// TODO
+    #[inline]
     pub unsafe fn align_of_ptr(src: *const u8) -> usize {
         let off: usize = mem::transmute(src);
         2.pow(off.trailing_zeros())
     }
 
     /// TODO
+    #[inline]
     pub unsafe fn reverse_memory_inplace(buf: *mut u8, len: usize) {
         use std::ptr::swap;
         let n: usize = len >> 1;
@@ -26,6 +28,7 @@ pub mod u8 {
     }
 
     /// TODO
+    #[inline]
     pub unsafe fn reverse_memory(dst: *mut u8, src: *const u8, len: usize) {
         let (mut d, mut s) = (dst, src);
         s = s.offset((len - 1) as isize);
@@ -43,6 +46,7 @@ pub mod u16 {
     pub const BYTES: usize = 2;
 
     /// TODO
+    #[inline]
     pub unsafe fn swap_memory_inplace(buf: *mut u8, len: usize) {
         let mut b = buf;
         for _ in 0..len {
@@ -52,6 +56,7 @@ pub mod u16 {
     }
 
     /// TODO
+    #[inline]
     pub unsafe fn swap_memory(dst: *mut u8, src: *const u8, len: usize) {
         let (mut d, mut s) = (dst, src);
         for _ in 0..len {
@@ -67,6 +72,8 @@ pub mod u16 {
 pub mod u24 {
     use std::ptr;
     pub const BYTES: usize = 3;
+    
+    #[inline]
     pub unsafe fn swap_memory_inplace(buf: *mut u8, len: usize) {
         let mut b = buf;
         for _ in 0..len {
@@ -75,6 +82,8 @@ pub mod u24 {
             b = b.offset(3);
         }
     }
+    
+    #[inline]
     pub unsafe fn swap_memory(dst: *mut u8, src: *const u8, len: usize) {
         let (mut d, mut s) = (dst, src);
         for _ in 0..len {
@@ -91,6 +100,8 @@ pub mod u24 {
 pub mod u40 {
     use std::ptr;
     pub const BYTES: usize = 5;
+
+    #[inline]
     pub unsafe fn swap_memory_inplace(buf: *mut u8, len: usize) {
         let mut b = buf;
         for _ in 0..len {
@@ -100,6 +111,8 @@ pub mod u40 {
             b = b.offset(5);
         }
     }
+    
+    #[inline]
     pub unsafe fn swap_memory(dst: *mut u8, src: *const u8, len: usize) {
         let (mut d, mut s) = (dst, src);
         for _ in 0..len {
@@ -118,6 +131,8 @@ pub mod u40 {
 pub mod u48 {
     use std::ptr;
     pub const BYTES: usize = 6;
+
+    #[inline]
     pub unsafe fn swap_memory_inplace(buf: *mut u8, len: usize) {
         let mut b = buf;
         for _ in 0..len {
@@ -127,6 +142,8 @@ pub mod u48 {
             b = b.offset(6);
         }
     }
+
+    #[inline]
     pub unsafe fn swap_memory(dst: *mut u8, src: *const u8, len: usize) {
         let (mut d, mut s) = (dst, src);
         for _ in 0..len {
@@ -146,6 +163,8 @@ pub mod u48 {
 pub mod u56 {
     use std::ptr;
     pub const BYTES: usize = 7;
+
+    #[inline]
     pub unsafe fn swap_memory_inplace(buf: *mut u8, len: usize) {
         let mut b = buf;
         for _ in 0..len {
@@ -156,6 +175,8 @@ pub mod u56 {
             b = b.offset(7);
         }
     }
+
+    #[inline]
     pub unsafe fn swap_memory(dst: *mut u8, src: *const u8, len: usize) {
         let (mut d, mut s) = (dst, src);
         for _ in 0..len {
@@ -183,6 +204,7 @@ pub mod u32 {
     /// Swaps `len*4` bytes for `u32` objects inplace in `buf`.
     ///
     ///
+    #[inline]
     pub unsafe fn swap_memory_inplace(buf: *mut u8, len: usize) {
 
         unsafe fn u32_swap_memory_inplace_u8(buf: *mut u8, len: usize) {
@@ -212,6 +234,7 @@ pub mod u32 {
     /// Swaps `len*4` bytes for `u32` objects from `src` to `dst`. The source and destination may not overlap.
     ///
     ///
+    #[inline]
     pub unsafe fn swap_memory(dst: *mut u8, src: *const u8, len: usize) {
 
         unsafe fn u32_swap_nonoverlapping_memory_u8(dst: *mut u8, src: *const u8, len: usize) {
@@ -254,6 +277,7 @@ pub mod u64 {
     /// Swaps `len*8` bytes for `u64` objects inplace in `buf`.
     ///
     ///
+    #[inline]
     pub unsafe fn swap_memory_inplace(buf: *mut u8, len: usize) {
 
         unsafe fn u64_swap_memory_inplace_u8(buf: *mut u8, len: usize) {
@@ -285,6 +309,7 @@ pub mod u64 {
     /// Swaps `len*8` bytes for `u64` objects from `src` to `dst`. The source and destination may not overlap.
     ///
     ///
+    #[inline]
     pub unsafe fn swap_memory(dst: *mut u8, src: *const u8, len: usize) {
 
         unsafe fn u64_swap_nonoverlapping_memory_u8(dst: *mut u8, src: *const u8, len: usize) {
@@ -326,6 +351,7 @@ pub mod beunknown {
     use std::num::Int;
     use std::ptr;
 
+    #[inline]
     pub fn decode(src: &[u8], nbytes: usize) -> u64 {
         assert!(src.len() >= nbytes);
         assert!(0 < nbytes && nbytes < 9);
@@ -338,6 +364,8 @@ pub mod beunknown {
             (*(ptr_out as *const u64)).to_be()
         }
     }
+
+    #[inline]
     pub fn encode(dst: &mut [u8], src: u64, nbytes: usize) {
         assert!(dst.len() >= nbytes);
         assert!(0 < nbytes && nbytes < 9);
@@ -354,6 +382,7 @@ pub mod leunknown {
     use std::num::Int;
     use std::ptr;
 
+    #[inline]
     pub fn decode(src: &[u8], nbytes: usize) -> u64 {
         assert!(src.len() >= nbytes);
         assert!(0 < nbytes && nbytes < 9);
@@ -365,6 +394,8 @@ pub mod leunknown {
             (*(ptr_out as *const u64)).to_le()
         }
     }
+
+    #[inline]
     pub fn encode(dst: &mut [u8], src: u64, nbytes: usize) {
         assert!(dst.len() >= nbytes);
         assert!(0 < nbytes && nbytes < 9);
@@ -382,6 +413,7 @@ macro_rules! mod_odd_impls {
         use std::num::Int;
         use std::ptr;
 
+        #[inline]
         unsafe fn swap_memory(dst: *mut u8, src: *const u8, len: usize) {
             if cfg!(target_endian = $NotE) {
                 super::$T::swap_memory(dst, src, len);
@@ -391,6 +423,7 @@ macro_rules! mod_odd_impls {
         }
 
         /// Decodes $E-endian bytes to a native-endian $T object.
+        #[inline]
         pub fn decode(buf: &[u8]) -> $S {
             assert!(buf.len() >= $Bytes);
             unsafe {
@@ -401,6 +434,7 @@ macro_rules! mod_odd_impls {
         }
 
         /// Decodes $E-endian bytes to a slice of native-endian $T objects.
+        #[inline]
         pub fn decode_slice(dst: &mut [[u8; $Bytes]], src: &[u8]) {
             assert!(dst.len()*$Bytes >= src.len());
             unsafe {
@@ -409,6 +443,7 @@ macro_rules! mod_odd_impls {
         }
 
         /// Encodes a native-endian $T object to $E-endian bytes.
+        #[inline]
         pub fn encode(dst: &mut [u8], src: $S) {
             assert!(dst.len() >= $Bytes);
             unsafe {
@@ -418,6 +453,7 @@ macro_rules! mod_odd_impls {
         }
 
         /// Encodes a slice of native-endian $T objects to $E-endian bytes.
+        #[inline]
         pub fn encode_slice(dst: &mut [u8], src: &[[u8; $Bytes]]) {
             assert!(dst.len() >= src.len()*$Bytes);
             unsafe {
@@ -434,6 +470,7 @@ macro_rules! mod_std_impls {
         use std::num::Int;
         use std::ptr;
 
+        #[inline]
         unsafe fn swap_memory(dst: *mut u8, src: *const u8, len: usize) {
             if cfg!(target_endian = $NotE) {
                 super::$T::swap_memory(dst, src, len);
@@ -443,6 +480,7 @@ macro_rules! mod_std_impls {
         }
 
         /// Decodes $E-endian bytes to a native-endian $T object.
+        #[inline]
         pub fn decode(buf: &[u8]) -> $T {
             assert!(buf.len() >= ::std::$T::BYTES);
             unsafe {
@@ -453,6 +491,7 @@ macro_rules! mod_std_impls {
         }
 
         /// Decodes $E-endian bytes to a slice of native-endian $T objects.
+        #[inline]
         pub fn decode_slice(dst: &mut [$T], src: &[u8]) {
             assert!(dst.len()*::std::$T::BYTES >= src.len());
             unsafe {
@@ -461,6 +500,7 @@ macro_rules! mod_std_impls {
         }
 
         /// Encodes a native-endian $T object to $E-endian bytes.
+        #[inline]
         pub fn encode(dst: &mut [u8], src: $T) {
             assert!(dst.len() >= ::std::$T::BYTES);
             unsafe {
@@ -470,6 +510,7 @@ macro_rules! mod_std_impls {
         }
 
         /// Encodes a slice of native-endian $T objects to $E-endian bytes.
+        #[inline]
         pub fn encode_slice(dst: &mut [u8], src: &[$T]) {
             assert!(dst.len() >= src.len()*::std::$T::BYTES);
             unsafe {

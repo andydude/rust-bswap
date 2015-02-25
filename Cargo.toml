@@ -1,5 +1,5 @@
 [package]
 
 name = "bswap"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Andrew Robbins <and_j_rob@yahoo.com>"]
