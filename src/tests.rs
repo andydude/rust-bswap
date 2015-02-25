@@ -246,9 +246,9 @@ macro_rules! qc_byte_order {
                 fn prop(n: $ty_int) -> bool {
                     let mut buf = [0; 8];
                     //println!("big_endian({:016x})", n);
-                    super::super::beunknown::encode(&mut buf[8 - $bytes..], n as u64, $bytes);
+                    super::super::beusize::encode(&mut buf[8 - $bytes..], n as u64, $bytes);
                     //println!("{}", (&buf[..]).to_hex());
-                    let m = super::super::beunknown::decode(&mut buf[8 - $bytes..], $bytes) as $ty_int;
+                    let m = super::super::beusize::decode(&mut buf[8 - $bytes..], $bytes) as $ty_int;
                     //println!("{:016x}", m);
                     n == m
                 }
@@ -261,9 +261,9 @@ macro_rules! qc_byte_order {
                 fn prop(n: $ty_int) -> bool {
                     let mut buf = [0; 8];
                     //println!("little_endian({:016x})", n);
-                    super::super::leunknown::encode(&mut buf[..$bytes], n as u64, $bytes);
+                    super::super::leusize::encode(&mut buf[..$bytes], n as u64, $bytes);
                     //println!("{}", (&buf[..]).to_hex());
-                    let m = super::super::leunknown::decode(&mut buf[..$bytes], $bytes) as $ty_int;
+                    let m = super::super::leusize::decode(&mut buf[..$bytes], $bytes) as $ty_int;
                     //println!("{:016x}", m);
                     n == m
                 }
@@ -307,23 +307,23 @@ qc_byte_order!(prop_i32, i32, u32, beu32, leu32);
 qc_byte_order!(prop_u64, u64, u64, beu64, leu64);
 qc_byte_order!(prop_i64, i64, u64, beu64, leu64);
 
-qc_byte_order!(prop_uint_1, u64, u64, 1, beunknown, leunknown);
-qc_byte_order!(prop_uint_2, u64, u64, 2, beunknown, leunknown);
-qc_byte_order!(prop_uint_3, u64, u64, 3, beunknown, leunknown);
-qc_byte_order!(prop_uint_4, u64, u64, 4, beunknown, leunknown);
-qc_byte_order!(prop_uint_5, u64, u64, 5, beunknown, leunknown);
-qc_byte_order!(prop_uint_6, u64, u64, 6, beunknown, leunknown);
-qc_byte_order!(prop_uint_7, u64, u64, 7, beunknown, leunknown);
-qc_byte_order!(prop_uint_8, u64, u64, 8, beunknown, leunknown);
+qc_byte_order!(prop_uint_1, u64, u64, 1, beusize, leusize);
+qc_byte_order!(prop_uint_2, u64, u64, 2, beusize, leusize);
+qc_byte_order!(prop_uint_3, u64, u64, 3, beusize, leusize);
+qc_byte_order!(prop_uint_4, u64, u64, 4, beusize, leusize);
+qc_byte_order!(prop_uint_5, u64, u64, 5, beusize, leusize);
+qc_byte_order!(prop_uint_6, u64, u64, 6, beusize, leusize);
+qc_byte_order!(prop_uint_7, u64, u64, 7, beusize, leusize);
+qc_byte_order!(prop_uint_8, u64, u64, 8, beusize, leusize);
 
-qc_byte_order!(prop_int_1, i64, u64, 1, beunknown, leunknown);
-qc_byte_order!(prop_int_2, i64, u64, 2, beunknown, leunknown);
-qc_byte_order!(prop_int_3, i64, u64, 3, beunknown, leunknown);
-qc_byte_order!(prop_int_4, i64, u64, 4, beunknown, leunknown);
-qc_byte_order!(prop_int_5, i64, u64, 5, beunknown, leunknown);
-qc_byte_order!(prop_int_6, i64, u64, 6, beunknown, leunknown);
-qc_byte_order!(prop_int_7, i64, u64, 7, beunknown, leunknown);
-qc_byte_order!(prop_int_8, i64, u64, 8, beunknown, leunknown);
+qc_byte_order!(prop_int_1, i64, u64, 1, beusize, leusize);
+qc_byte_order!(prop_int_2, i64, u64, 2, beusize, leusize);
+qc_byte_order!(prop_int_3, i64, u64, 3, beusize, leusize);
+qc_byte_order!(prop_int_4, i64, u64, 4, beusize, leusize);
+qc_byte_order!(prop_int_5, i64, u64, 5, beusize, leusize);
+qc_byte_order!(prop_int_6, i64, u64, 6, beusize, leusize);
+qc_byte_order!(prop_int_7, i64, u64, 7, beusize, leusize);
+qc_byte_order!(prop_int_8, i64, u64, 8, beusize, leusize);
 
 // Test that all of the byte conversion functions panic when given a
 // buffer that is too small.
@@ -390,21 +390,21 @@ too_small!(small_i32, 3, 0, beu32, leu32);
 too_small!(small_u64, 7, 0, beu64, leu64);
 too_small!(small_i64, 7, 0, beu64, leu64);
 
-too_small!(small_uint_1, 1, beunknown, leunknown);
-too_small!(small_uint_2, 2, beunknown, leunknown);
-too_small!(small_uint_3, 3, beunknown, leunknown);
-too_small!(small_uint_4, 4, beunknown, leunknown);
-too_small!(small_uint_5, 5, beunknown, leunknown);
-too_small!(small_uint_6, 6, beunknown, leunknown);
-too_small!(small_uint_7, 7, beunknown, leunknown);
+too_small!(small_uint_1, 1, beusize, leusize);
+too_small!(small_uint_2, 2, beusize, leusize);
+too_small!(small_uint_3, 3, beusize, leusize);
+too_small!(small_uint_4, 4, beusize, leusize);
+too_small!(small_uint_5, 5, beusize, leusize);
+too_small!(small_uint_6, 6, beusize, leusize);
+too_small!(small_uint_7, 7, beusize, leusize);
 
-too_small!(small_int_1, 1, beunknown, leunknown);
-too_small!(small_int_2, 2, beunknown, leunknown);
-too_small!(small_int_3, 3, beunknown, leunknown);
-too_small!(small_int_4, 4, beunknown, leunknown);
-too_small!(small_int_5, 5, beunknown, leunknown);
-too_small!(small_int_6, 6, beunknown, leunknown);
-too_small!(small_int_7, 7, beunknown, leunknown);
+too_small!(small_int_1, 1, beusize, leusize);
+too_small!(small_int_2, 2, beusize, leusize);
+too_small!(small_int_3, 3, beusize, leusize);
+too_small!(small_int_4, 4, beusize, leusize);
+too_small!(small_int_5, 5, beusize, leusize);
+too_small!(small_int_6, 6, beusize, leusize);
+too_small!(small_int_7, 7, beusize, leusize);
 
 #[test]
 fn test_read_bytes_ext() {

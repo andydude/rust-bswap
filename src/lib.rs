@@ -346,7 +346,7 @@ pub mod u64 {
     }
 }
 
-pub mod beunknown {
+pub mod beusize {
     use std::mem;
     use std::num::Int;
     use std::ptr;
@@ -354,7 +354,7 @@ pub mod beunknown {
     #[inline]
     pub fn decode(src: &[u8], nbytes: usize) -> u64 {
         assert!(src.len() >= nbytes);
-        assert!(0 < nbytes && nbytes < 9);
+        assert!(0 < nbytes && nbytes <= 8);
         let mut dst = [0u8; 8];
         let ptr_out = dst.as_mut_ptr();
         unsafe {
@@ -368,7 +368,7 @@ pub mod beunknown {
     #[inline]
     pub fn encode(dst: &mut [u8], src: u64, nbytes: usize) {
         assert!(dst.len() >= nbytes);
-        assert!(0 < nbytes && nbytes < 9);
+        assert!(0 < nbytes && nbytes <= 8);
         unsafe {
             let bytes: &[u8; 8] = &mem::transmute::<_, [u8; 8]>(src.to_be());
             ptr::copy_nonoverlapping_memory(
@@ -377,7 +377,7 @@ pub mod beunknown {
     }
 }
 
-pub mod leunknown {
+pub mod leusize {
     use std::mem;
     use std::num::Int;
     use std::ptr;
@@ -385,7 +385,7 @@ pub mod leunknown {
     #[inline]
     pub fn decode(src: &[u8], nbytes: usize) -> u64 {
         assert!(src.len() >= nbytes);
-        assert!(0 < nbytes && nbytes < 9);
+        assert!(0 < nbytes && nbytes <= 8);
         let mut dst = [0u8; 8];
         let ptr_out = dst.as_mut_ptr();
         unsafe {
@@ -398,7 +398,7 @@ pub mod leunknown {
     #[inline]
     pub fn encode(dst: &mut [u8], src: u64, nbytes: usize) {
         assert!(dst.len() >= nbytes);
-        assert!(0 < nbytes && nbytes < 9);
+        assert!(0 < nbytes && nbytes <= 8);
         unsafe {
             let bytes: &[u8; 8] = &mem::transmute::<_, [u8; 8]>(src.to_le());
             ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), (&bytes[..nbytes]).as_ptr(), nbytes);
