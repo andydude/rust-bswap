@@ -316,7 +316,7 @@ pub mod beunknown {
     use std::num::Int;
     use std::ptr;
 
-    pub fn decode(buf: &[u8], nbytes: u8) -> u64 {
+    pub fn decode(buf: &[u8], nbytes: usize) -> u64 {
         assert_eq!(buf.len(), nbytes);
         let mut out = [0u8; 8];
         let ptr_out = out.as_mut_ptr();
@@ -333,7 +333,7 @@ pub mod leunknown {
     use std::num::Int;
     use std::ptr;
 
-    pub fn decode(buf: &[u8], nbytes: u8) -> u64 {
+    pub fn decode(buf: &[u8], nbytes: usize) -> u64 {
         assert_eq!(buf.len(), nbytes);
         let mut out = [0u8; 8];
         let ptr_out = out.as_mut_ptr();
