@@ -408,7 +408,7 @@ too_small!(small_int_7, 7, beunknown, leunknown);
 
 #[test]
 fn test_read_bytes_ext() {
-    let mut rdr = vec![2, 5, 3, 0];
+    let rdr = vec![2, 5, 3, 0];
     assert_eq!(517, super::beu16::decode(&rdr[0..2]));
     assert_eq!(768, super::beu16::decode(&rdr[2..4]));
 }
