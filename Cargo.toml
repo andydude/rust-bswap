@@ -1,5 +1,9 @@
 [package]
-
 name = "bswap"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Andrew Robbins <and_j_rob@yahoo.com>"]
+license = "MIT"
+homepage = "https://andydude.github.io/rust-bswap/bswap/index.html"
+repository = "https://github.com/andydude/rust-bswap/"
+description = "A Rust library for byte-swapping integers, pointers, and slices."
+readme = "README.md"
