@@ -319,6 +319,7 @@ pub mod beunknown {
 
     pub fn decode(src: &[u8], nbytes: usize) -> u64 {
         assert!(src.len() >= nbytes);
+        assert!(0 < nbytes && nbytes < 9);
         let mut dst = [0u8; 8];
         let ptr_out = dst.as_mut_ptr();
         unsafe {
@@ -332,7 +333,7 @@ pub mod beunknown {
         assert!(dst.len() >= nbytes);
         unsafe {
             let bytes = (&mem::transmute::<_, [u8; 8]>(src.to_be())).as_ptr();
-            ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), bytes, nbytes);
+            ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), &bytes[8 - nbytes..], nbytes);
         }
     }
 }
@@ -344,6 +345,7 @@ pub mod leunknown {
 
     pub fn decode(src: &[u8], nbytes: usize) -> u64 {
         assert!(src.len() >= nbytes);
+        assert!(0 < nbytes && nbytes < 9);
         let mut dst = [0u8; 8];
         let ptr_out = dst.as_mut_ptr();
         unsafe {
@@ -356,7 +358,7 @@ pub mod leunknown {
         assert!(dst.len() >= nbytes);
         unsafe {
             let bytes = (&mem::transmute::<_, [u8; 8]>(src.to_be())).as_ptr();
-            ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), bytes, nbytes);
+            ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), &bytes[..nbytes], nbytes);
         }
     }
 }
