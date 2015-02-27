@@ -522,32 +522,32 @@ macro_rules! mod_std_impls {
     }
 }
 
+/// Swap bytes for `u16` objects only on little-endian targets, does nothing on big-endian targets.
+pub mod beu16 { mod_std_impls!(be, u16, from_be, to_be, "big", "little"); }
 /// Swap bytes for `[u8; 3]` objects only on little-endian targets, does nothing on big-endian targets.
 pub mod beu24 { mod_odd_impls!(be, u24, u32, 3, from_be, to_be, "big", "little"); }
+/// Swap bytes for `u32` objects only on little-endian targets, does nothing on big-endian targets.
+pub mod beu32 { mod_std_impls!(be, u32, from_be, to_be, "big", "little"); }
 /// Swap bytes for `[u8; 5]` objects only on little-endian targets, does nothing on big-endian targets.
 pub mod beu40 { mod_odd_impls!(be, u40, u64, 5, from_be, to_be, "big", "little"); }
 /// Swap bytes for `[u8; 6]` objects only on little-endian targets, does nothing on big-endian targets.
 pub mod beu48 { mod_odd_impls!(be, u48, u64, 6, from_be, to_be, "big", "little"); }
 /// Swap bytes for `[u8; 7]` objects only on little-endian targets, does nothing on big-endian targets.
 pub mod beu56 { mod_odd_impls!(be, u56, u64, 7, from_be, to_be, "big", "little"); }
+/// Swap bytes for `u64` objects only on little-endian targets, does nothing on big-endian targets.
+pub mod beu64 { mod_std_impls!(be, u64, from_be, to_be, "big", "little"); }
+/// Swap bytes for `u16` objects only on big-endian targets, does nothing on little-endian targets.
+pub mod leu16 { mod_std_impls!(le, u16, from_le, to_le, "little", "big"); }
 /// Swap bytes for `[u8; 3]` objects only on big-endian targets, does nothing on little-endian targets.
 pub mod leu24 { mod_odd_impls!(le, u24, u32, 3, from_le, to_le, "little", "big"); }
+/// Swap bytes for `u32` objects only on big-endian targets, does nothing on little-endian targets.
+pub mod leu32 { mod_std_impls!(le, u32, from_le, to_le, "little", "big"); }
 /// Swap bytes for `[u8; 5]` objects only on big-endian targets, does nothing on little-endian targets.
 pub mod leu40 { mod_odd_impls!(le, u40, u64, 5, from_le, to_le, "little", "big"); }
 /// Swap bytes for `[u8; 6]` objects only on big-endian targets, does nothing on little-endian targets.
 pub mod leu48 { mod_odd_impls!(le, u48, u64, 6, from_le, to_le, "little", "big"); }
 /// Swap bytes for `[u8; 7]` objects only on big-endian targets, does nothing on little-endian targets.
 pub mod leu56 { mod_odd_impls!(le, u56, u64, 7, from_le, to_le, "little", "big"); }
-/// Swap bytes for `u16` objects only on little-endian targets, does nothing on big-endian targets.
-pub mod beu16 { mod_std_impls!(be, u16, from_be, to_be, "big", "little"); }
-/// Swap bytes for `u16` objects only on big-endian targets, does nothing on little-endian targets.
-pub mod leu16 { mod_std_impls!(le, u16, from_le, to_le, "little", "big"); }
-/// Swap bytes for `u32` objects only on little-endian targets, does nothing on big-endian targets.
-pub mod beu32 { mod_std_impls!(be, u32, from_be, to_be, "big", "little"); }
-/// Swap bytes for `u32` objects only on big-endian targets, does nothing on little-endian targets.
-pub mod leu32 { mod_std_impls!(le, u32, from_le, to_le, "little", "big"); }
-/// Swap bytes for `u64` objects only on little-endian targets, does nothing on big-endian targets.
-pub mod beu64 { mod_std_impls!(be, u64, from_be, to_be, "big", "little"); }
 /// Swap bytes for `u64` objects only on big-endian targets, does nothing on little-endian targets.
 pub mod leu64 { mod_std_impls!(le, u64, from_le, to_le, "little", "big"); }
 
