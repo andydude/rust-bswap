@@ -12,7 +12,7 @@ pub mod u8 {
     #[inline]
     pub unsafe fn align_of_ptr(src: *const u8) -> usize {
         let off: usize = mem::transmute(src);
-        2.pow(off.trailing_zeros())
+        2.pow(off.trailing_zeros() as u32)
     }
 
     /// TODO
@@ -358,7 +358,7 @@ pub mod beusize {
         let mut dst = [0u8; 8];
         let ptr_out = dst.as_mut_ptr();
         unsafe {
-            ptr::copy_nonoverlapping_memory(
+            ptr::copy_nonoverlapping(
                 ptr_out.offset((8 - nbytes) as isize),
                 src.as_ptr(), nbytes);
             (*(ptr_out as *const u64)).to_be()
@@ -372,7 +372,7 @@ pub mod beusize {
         unsafe {
             // n.b. https://github.com/rust-lang/rust/issues/22776
             let bytes: [u8; 8] = mem::transmute::<_, [u8; 8]>(src.to_be());
-            ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), (&bytes[8 - nbytes..]).as_ptr(), nbytes);
+            ptr::copy_nonoverlapping(dst.as_mut_ptr(), (&bytes[8 - nbytes..]).as_ptr(), nbytes);
         }
     }
 }
@@ -389,7 +389,7 @@ pub mod leusize {
         let mut dst = [0u8; 8];
         let ptr_out = dst.as_mut_ptr();
         unsafe {
-            ptr::copy_nonoverlapping_memory(
+            ptr::copy_nonoverlapping(
                 ptr_out, src.as_ptr(), nbytes);
             (*(ptr_out as *const u64)).to_le()
         }
@@ -402,7 +402,7 @@ pub mod leusize {
         unsafe {
             // n.b. https://github.com/rust-lang/rust/issues/22776
             let bytes: [u8; 8] = mem::transmute::<_, [u8; 8]>(src.to_le());
-            ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), (&bytes[..nbytes]).as_ptr(), nbytes);
+            ptr::copy_nonoverlapping(dst.as_mut_ptr(), (&bytes[..nbytes]).as_ptr(), nbytes);
         }
     }
 }
@@ -419,7 +419,7 @@ macro_rules! mod_odd_impls {
             if cfg!(target_endian = $NotE) {
                 super::$T::swap_memory(dst, src, len);
             } else {
-                ptr::copy_nonoverlapping_memory(dst, src, len*$Bytes);
+                ptr::copy_nonoverlapping(dst, src, len*$Bytes);
             }
         }
 
@@ -429,7 +429,7 @@ macro_rules! mod_odd_impls {
             assert_eq!(buf.len(), $Bytes);
             unsafe {
                 let mut tmp: $S = mem::uninitialized();
-                ptr::copy_nonoverlapping_memory(&mut tmp as *mut _ as *mut u8, buf.as_ptr(), $Bytes);
+                ptr::copy_nonoverlapping(&mut tmp as *mut _ as *mut u8, buf.as_ptr(), $Bytes);
                 Int::$DFunc(tmp)
             }
         }
@@ -449,7 +449,7 @@ macro_rules! mod_odd_impls {
             assert_eq!(dst.len(), $Bytes);
             unsafe {
                 let tmp: $S = src.$EMeth();
-                ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), &tmp as *const _ as *const u8, $Bytes);
+                ptr::copy_nonoverlapping(dst.as_mut_ptr(), &tmp as *const _ as *const u8, $Bytes);
             }
         }
 
@@ -476,7 +476,7 @@ macro_rules! mod_std_impls {
             if cfg!(target_endian = $NotE) {
                 super::$T::swap_memory(dst, src, len);
             } else {
-                ptr::copy_nonoverlapping_memory(dst, src, len*::std::$T::BYTES);
+                ptr::copy_nonoverlapping(dst, src, len*::std::$T::BYTES);
             }
         }
 
@@ -486,7 +486,7 @@ macro_rules! mod_std_impls {
             assert_eq!(buf.len(), ::std::$T::BYTES);
             unsafe {
                 let mut tmp: $T = mem::uninitialized();
-                ptr::copy_nonoverlapping_memory(&mut tmp as *mut _ as *mut u8, buf.as_ptr(), ::std::$T::BYTES);
+                ptr::copy_nonoverlapping(&mut tmp as *mut _ as *mut u8, buf.as_ptr(), ::std::$T::BYTES);
                 Int::$DFunc(tmp)
             }
         }
@@ -506,7 +506,7 @@ macro_rules! mod_std_impls {
             assert_eq!(dst.len(), ::std::$T::BYTES);
             unsafe {
                 let tmp: $T = src.$EMeth();
-                ptr::copy_nonoverlapping_memory(dst.as_mut_ptr(), &tmp as *const _ as *const u8, ::std::$T::BYTES);
+                ptr::copy_nonoverlapping(dst.as_mut_ptr(), &tmp as *const _ as *const u8, ::std::$T::BYTES);
             }
         }
 
