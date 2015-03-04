@@ -279,8 +279,8 @@ macro_rules! qc_byte_order {
             fn big_endian() {
                 fn prop(n: $ty_int) -> bool {
                     let mut buf = [0; 8];
-                    super::super::$bemod::encode(&mut buf[(8 - ::std::$ty_int::BYTES)..], n as $ty_uint);
-                    n == super::super::$bemod::decode(&mut buf[(8 - ::std::$ty_int::BYTES)..]) as $ty_int
+                    super::super::$bemod::encode(&mut buf[(8 - (::std::$ty_int::BYTES as usize))..], n as $ty_uint);
+                    n == super::super::$bemod::decode(&mut buf[(8 - (::std::$ty_int::BYTES as usize))..]) as $ty_int
                 }
                 qc_sized(prop as fn($ty_int) -> bool,
                          ::std::$ty_int::MAX as $ty_int - 1);
@@ -290,8 +290,8 @@ macro_rules! qc_byte_order {
             fn little_endian() {
                 fn prop(n: $ty_int) -> bool {
                     let mut buf = [0; 8];
-                    super::super::$lemod::encode(&mut buf[..(::std::$ty_int::BYTES)], n as $ty_uint);
-                    n == super::super::$lemod::decode(&mut buf[..(::std::$ty_int::BYTES)]) as $ty_int
+                    super::super::$lemod::encode(&mut buf[..((::std::$ty_int::BYTES as usize))], n as $ty_uint);
+                    n == super::super::$lemod::decode(&mut buf[..((::std::$ty_int::BYTES as usize))]) as $ty_int
                 }
                 qc_sized(prop as fn($ty_int) -> bool,
                          ::std::$ty_int::MAX as $ty_int - 1);
