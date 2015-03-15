@@ -335,28 +335,28 @@ macro_rules! too_small {
         mod $name {
 
             #[test]
-            #[should_fail]
+            #[should_panic]
             fn read_big_endian() {
                 let buf = [0; $maximally_small];
                 super::super::$bemod::decode(&buf);
             }
 
             #[test]
-            #[should_fail]
+            #[should_panic]
             fn read_little_endian() {
                 let buf = [0; $maximally_small];
                 super::super::$lemod::decode(&buf);
             }
 
             #[test]
-            #[should_fail]
+            #[should_panic]
             fn write_big_endian() {
                 let mut buf = [0; $maximally_small];
                 super::super::$bemod::encode(&mut buf, $zero);
             }
 
             #[test]
-            #[should_fail]
+            #[should_panic]
             fn write_little_endian() {
                 let mut buf = [0; $maximally_small];
                 super::super::$lemod::encode(&mut buf, $zero);
@@ -367,14 +367,14 @@ macro_rules! too_small {
         mod $name {
 
             #[test]
-            #[should_fail]
+            #[should_panic]
             fn read_big_endian() {
                 let buf = [0; $maximally_small];
                 super::super::$bemod::decode(&buf, $maximally_small + 1);
             }
 
             #[test]
-            #[should_fail]
+            #[should_panic]
             fn read_little_endian() {
                 let buf = [0; $maximally_small];
                 super::super::$lemod::decode(&buf, $maximally_small + 1);
