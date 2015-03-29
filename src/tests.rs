@@ -40,9 +40,9 @@ fn test_u8_reverse_memory_u8x16_lorem_ipsum() {
             (&mut dst[..]).as_mut_ptr(),
             src.as_ptr(), src.len());
     }
-    println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
-    println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
-    println!("exp = '{}'", String::from_utf8((&MUSPI_MEROL[1582..]).to_vec()).unwrap().as_slice());
+    //println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
+    //println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
+    //println!("exp = '{}'", String::from_utf8((&MUSPI_MEROL[1582..]).to_vec()).unwrap().as_slice());
     assert_eq!(&dst[..], &MUSPI_MEROL[1582..]);
 }
 
@@ -147,8 +147,8 @@ fn test_u64_swap_memory_hi() {
             (&mut dst[..]).as_mut_ptr(),
             src.as_ptr(), src.len()/8);
     }
-    println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
-    println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
+    //println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
+    //println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
     assert_eq!(&dst[..], b"dlrow ih");
 }
 
@@ -162,8 +162,8 @@ fn test_u64_swap_memory_inplace_hi() {
             (&mut dst[..]).as_mut_ptr(),
             dst.len()/8);
     }
-    println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
-    println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
+    //println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
+    //println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
     assert_eq!(&dst[..], b"dlrow ih");
 }
 
@@ -176,8 +176,8 @@ fn test_u64_swap_memory_pangram() {
             (&mut dst[..]).as_mut_ptr(),
             src.as_ptr(), src.len()/8);
     }
-    println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
-    println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
+    //println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
+    //println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
     assert_eq!(&dst[..], b"xob eviFaziw gnipmuj sdrylkciuq ");
 }
 
@@ -191,8 +191,8 @@ fn test_u64_swap_memory_inplace_pangram() {
             (&mut dst[..]).as_mut_ptr(),
             dst.len()/8);
     }
-    println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
-    println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
+    //println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
+    //println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
     assert_eq!(&dst[..], b"xob eviFaziw gnipmuj sdrylkciuq ");
 }
 
@@ -205,9 +205,9 @@ fn test_u64_swap_memory_lorem_ipsum() {
             (&mut dst[..]).as_mut_ptr(),
             src.as_ptr(), src.len()/8);
     }
-    println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
-    println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
-    println!("exp = '{}'", String::from_utf8((LOREM_IPSUM_160_U64_SWAP_MEMORY).to_vec()).unwrap().as_slice());
+    //println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
+    //println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
+    //println!("exp = '{}'", String::from_utf8((LOREM_IPSUM_160_U64_SWAP_MEMORY).to_vec()).unwrap().as_slice());
     assert_eq!(&dst[..], LOREM_IPSUM_160_U64_SWAP_MEMORY);
 }
 
@@ -221,9 +221,9 @@ fn test_u64_swap_memory_inplace_lorem_ipsum() {
             (&mut dst[..]).as_mut_ptr(),
             dst.len()/8);
     }
-    println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
-    println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
-    println!("exp = '{}'", String::from_utf8((LOREM_IPSUM_160_U64_SWAP_MEMORY).to_vec()).unwrap().as_slice());
+    //println!("src = '{}'", String::from_utf8(src.to_vec()).unwrap().as_slice());
+    //println!("dst = '{}'", String::from_utf8(dst.to_vec()).unwrap().as_slice());
+    //println!("exp = '{}'", String::from_utf8((LOREM_IPSUM_160_U64_SWAP_MEMORY).to_vec()).unwrap().as_slice());
     assert_eq!(&dst[..], LOREM_IPSUM_160_U64_SWAP_MEMORY);
 }
 

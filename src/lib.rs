@@ -1,17 +1,17 @@
-#![feature(core, test)]
+#![feature(core, test, str_char)]
 extern crate test;
 /*
-pub mod ptr {
+pub mod intrinsics {
     use std::ptr;
     use std::num::Int;
-    
-    pub unsafe fn reverse_memory_inplace<T: Int>(dst: *mut T, count: usize) {
+
+    pub unsafe fn reverse_inplace<T: Int>(dst: *mut T, count: usize) {
         for i in 0..count {
             let (d, s) = (*dst.offset(0), *dst.offset(i));
             (*dst.offset(i)) = (*src.offset(i)).swap_bytes();
         }
     }
-    pub unsafe fn reverse_memory<T: Int>(dst: *mut T, src: *const T, count: usize) {
+    pub unsafe fn reverse<T: Int>(dst: *mut T, src: *const T, count: usize) {
         for i in 0..count {
             (*dst.offset(i)) = (*src.offset(i)).swap_bytes();
             dst = dst.offset(1);
@@ -19,26 +19,26 @@ pub mod ptr {
         }
     }
 
-    // 
-    pub unsafe fn reverse_nonoverlapping_memory<T: Int>(dst: *mut T, src: *const T, count: usize) {
+    //
+    pub unsafe fn reverse_nonoverlapping<T: Int>(dst: *mut T, src: *const T, count: usize) {
     }
-    
+
     // bswap
-    pub unsafe fn swap_memory_inplace<T: Int>(dst: *mut T, count: usize) {
+    pub unsafe fn swap_inplace<T: Int>(dst: *mut T, count: usize) {
         for i in 0..count {
             dst.offset(i) = dst.offset(i).swap_bytes();
         }
     }
-    
+
     // bswapmove
-    pub unsafe fn swap_memory<T: Int>(dst: *mut T, src: *const T, count: usize) {
+    pub unsafe fn swap<T: Int>(dst: *mut T, src: *const T, count: usize) {
         unsafe {
             let diff: isize = mem::transmute(dst - src);
-            
+
         }
     }
     // bswapcopy
-    pub unsafe fn swap_nonoverlapping_memory<T: Int>(dst: *mut T, src: *const T, count: usize) {
+    pub unsafe fn swap_nonoverlapping<T: Int>(dst: *mut T, src: *const T, count: usize) {
     }
 }
  */
@@ -48,6 +48,8 @@ pub mod u8 {
     use std::num::Int;
     use std::ptr;
     use std::mem;
+    use std::error;
+    use std::fmt;
     pub const BYTES: usize = 1;
 
     /// TODO
@@ -119,7 +121,81 @@ pub mod u8 {
             d = d.offset(size as isize);
             s = s.offset(size as isize);
         }
-    }    
+    }
+
+    /// Errors that can occur when decoding a hex encoded string
+    #[derive(Copy)]
+    pub enum FromHexError {
+        /// The input contained a character not part of the hex format
+        InvalidHexCharacter(char, usize),
+        /// The input had an invalid length
+        InvalidHexLength,
+    }
+    impl error::Error for FromHexError {
+        fn description(&self) -> &str {
+            match *self {
+                FromHexError::InvalidHexCharacter(_, _) => "Invalid character '{}' at position {}",
+                FromHexError::InvalidHexLength => "Invalid length",
+            }
+        }
+    }
+    impl fmt::Debug for FromHexError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            use std::error::Error;
+            write!(f, "{}", self.description())
+        }
+    }
+    impl fmt::Display for FromHexError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            fmt::Debug::fmt(&self, f)
+        }
+    }
+
+    pub fn decode_hex(src: &str) -> Result<Vec<u8>, FromHexError> {
+        // This may be an overestimate if there is any whitespace
+        let mut b = Vec::with_capacity(src.len() / 2);
+        let mut modulus = 0;
+        let mut buf = 08;
+
+        for (idx, byte) in src.bytes().enumerate() {
+            buf <<= 4;
+
+            match byte {
+                b'A'...b'F' => buf |= byte - b'A' + 10,
+                b'a'...b'f' => buf |= byte - b'a' + 10,
+                b'0'...b'9' => buf |= byte - b'0',
+                b' '|b'\r'|b'\n'|b'\t' => {
+                    buf >>= 4;
+                    continue
+                }
+                _ => return Err(FromHexError::InvalidHexCharacter(src.char_at(idx), idx)),
+            }
+
+            modulus += 1;
+            if modulus == 2 {
+                modulus = 0;
+                b.push(buf);
+            }
+        }
+
+        match modulus {
+            0 => Ok(b.into_iter().collect()),
+            _ => Err(FromHexError::InvalidHexLength),
+        }
+    }
+
+    pub fn endode_hex(src: &[u8]) -> String {
+        static CHARS: &'static[u8] = b"0123456789abcdef";
+        let mut v = Vec::with_capacity(src.len() * 2);
+        for &byte in src.iter() {
+            v.push(CHARS[(byte >> 4) as usize]);
+            v.push(CHARS[(byte & 0xf) as usize]);
+        }
+
+        unsafe {
+            String::from_utf8_unchecked(v)
+        }
+    }
 }
 
 /// Swap bytes for `u16` objects on all targets.
@@ -153,7 +229,7 @@ pub mod u16 {
 /// Swap bytes for `[u8; 3]` objects on all targets.
 pub mod u24 {
     pub const BYTES: usize = 3;
-    
+
     #[inline]
     pub unsafe fn swap_memory_inplace(buf: *mut u8, len: usize) {
         use std::ptr::swap;
@@ -164,7 +240,7 @@ pub mod u24 {
             b = b.offset(3);
         }
     }
-    
+
     #[inline]
     pub unsafe fn swap_memory(dst: *mut u8, src: *const u8, len: usize) {
         let (mut d, mut s) = (dst, src);
@@ -193,7 +269,7 @@ pub mod u40 {
             b = b.offset(5);
         }
     }
-    
+
     #[inline]
     pub unsafe fn swap_memory(dst: *mut u8, src: *const u8, len: usize) {
         let (mut d, mut s) = (dst, src);
