@@ -1,8 +1,8 @@
 #![feature(core, test)]
 extern crate test;
 /*
-pub mod intrinsics {
-    use std::intrinsics;
+pub mod ptr {
+    use std::ptr;
     use std::num::Int;
     
     pub unsafe fn reverse_memory_inplace<T: Int>(dst: *mut T, count: usize) {
@@ -33,7 +33,7 @@ pub mod intrinsics {
     // bswapmove
     pub unsafe fn swap_memory<T: Int>(dst: *mut T, src: *const T, count: usize) {
         unsafe {
-            let diff: isize = intrinsics::transmute(dst - src);
+            let diff: isize = mem::transmute(dst - src);
             
         }
     }
@@ -46,13 +46,14 @@ pub mod intrinsics {
 /// Swap bytes for `u8` slices on all targets.
 pub mod u8 {
     use std::num::Int;
-    use std::intrinsics;
+    use std::ptr;
+    use std::mem;
     pub const BYTES: usize = 1;
 
     /// TODO
     #[inline]
     pub unsafe fn align_of_ptr(src: *const u8) -> usize {
-        let off: usize = intrinsics::transmute(src);
+        let off: usize = mem::transmute(src);
         2.pow(off.trailing_zeros() as u32)
     }
 
@@ -66,7 +67,7 @@ pub mod u8 {
     #[inline]
     pub fn reverse_slice(dst: &mut [u8], src: &[u8]) {
         unsafe {
-            intrinsics::copy_nonoverlapping(dst.as_mut_ptr(),
+            ptr::copy_nonoverlapping(dst.as_mut_ptr(),
                                             src.as_ptr(),
                                             src.len());
         }
@@ -429,7 +430,8 @@ pub mod u64 {
 
 pub mod beusize {
     use std::num::Int;
-    use std::intrinsics;
+    use std::ptr;
+    use std::mem;
 
     #[inline]
     pub fn decode(src: &[u8], nbytes: usize) -> u64 {
@@ -438,7 +440,7 @@ pub mod beusize {
         let mut dst = [0u8; 8];
         let ptr_out = dst.as_mut_ptr();
         unsafe {
-            intrinsics::copy_nonoverlapping(
+            ptr::copy_nonoverlapping(
                 ptr_out.offset((8 - nbytes) as isize), src.as_ptr(), nbytes);
             (*(ptr_out as *const u64)).to_be()
         }
@@ -450,8 +452,8 @@ pub mod beusize {
         assert!(0 < nbytes && nbytes <= 8);
         unsafe {
             // n.b. https://github.com/rust-lang/rust/issues/22776
-            let bytes: [u8; 8] = intrinsics::transmute::<_, [u8; 8]>(src.to_be());
-            intrinsics::copy_nonoverlapping(
+            let bytes: [u8; 8] = mem::transmute::<_, [u8; 8]>(src.to_be());
+            ptr::copy_nonoverlapping(
                 dst.as_mut_ptr(), (&bytes[8 - nbytes..]).as_ptr(), nbytes);
         }
     }
@@ -459,7 +461,8 @@ pub mod beusize {
 
 pub mod leusize {
     use std::num::Int;
-    use std::intrinsics;
+    use std::ptr;
+    use std::mem;
 
     #[inline]
     pub fn decode(src: &[u8], nbytes: usize) -> u64 {
@@ -468,7 +471,7 @@ pub mod leusize {
         let mut dst = [0u8; 8];
         let ptr_out = dst.as_mut_ptr();
         unsafe {
-            intrinsics::copy_nonoverlapping(
+            ptr::copy_nonoverlapping(
                 ptr_out, src.as_ptr(), nbytes);
             (*(ptr_out as *const u64)).to_le()
         }
@@ -480,8 +483,8 @@ pub mod leusize {
         assert!(0 < nbytes && nbytes <= 8);
         unsafe {
             // n.b. https://github.com/rust-lang/rust/issues/22776
-            let bytes: [u8; 8] = intrinsics::transmute::<_, [u8; 8]>(src.to_le());
-            intrinsics::copy_nonoverlapping(
+            let bytes: [u8; 8] = mem::transmute::<_, [u8; 8]>(src.to_le());
+            ptr::copy_nonoverlapping(
                 dst.as_mut_ptr(), (&bytes[..nbytes]).as_ptr(), nbytes);
         }
     }
@@ -491,14 +494,15 @@ pub mod leusize {
 macro_rules! mod_odd_impls {
     ($I:ident, $T:ident, $S:ident, $Bytes:expr, $DFunc:ident, $EMeth:ident, $E:expr, $NotE:expr) => {
         use std::num::Int;
-        use std::intrinsics;
+        use std::ptr;
+        use std::mem;
 
         #[inline]
         unsafe fn swap_memory(dst: *mut u8, src: *const u8, len: usize) {
             if cfg!(target_endian = $NotE) {
                 super::$T::swap_memory(dst, src, len);
             } else {
-                intrinsics::copy_nonoverlapping(dst, src, len*$Bytes);
+                ptr::copy_nonoverlapping(dst, src, len*$Bytes);
             }
         }
 
@@ -507,8 +511,8 @@ macro_rules! mod_odd_impls {
         pub fn decode(buf: &[u8]) -> $S {
             assert_eq!(buf.len(), $Bytes);
             unsafe {
-                let mut tmp: $S = intrinsics::uninit();
-                intrinsics::copy_nonoverlapping(&mut tmp as *mut _ as *mut u8, buf.as_ptr(), $Bytes);
+                let mut tmp: $S = mem::uninitialized();
+                ptr::copy_nonoverlapping(&mut tmp as *mut _ as *mut u8, buf.as_ptr(), $Bytes);
                 Int::$DFunc(tmp)
             }
         }
@@ -528,7 +532,7 @@ macro_rules! mod_odd_impls {
             assert_eq!(dst.len(), $Bytes);
             unsafe {
                 let tmp: $S = src.$EMeth();
-                intrinsics::copy_nonoverlapping(dst.as_mut_ptr(), &tmp as *const _ as *const u8, $Bytes);
+                ptr::copy_nonoverlapping(dst.as_mut_ptr(), &tmp as *const _ as *const u8, $Bytes);
             }
         }
 
@@ -547,14 +551,15 @@ macro_rules! mod_odd_impls {
 macro_rules! mod_std_impls {
     ($I:ident, $T:ident, $Bytes:expr, $DFunc:ident, $EMeth:ident, $E:expr, $NotE:expr) => {
         use std::num::Int;
-        use std::intrinsics;
+        use std::ptr;
+        use std::mem;
 
         #[inline]
         unsafe fn swap_memory(dst: *mut u8, src: *const u8, len: usize) {
             if cfg!(target_endian = $NotE) {
                 super::$T::swap_memory(dst, src, len);
             } else {
-                intrinsics::copy_nonoverlapping(dst, src, len*$Bytes);
+                ptr::copy_nonoverlapping(dst, src, len*$Bytes);
             }
         }
 
@@ -563,8 +568,8 @@ macro_rules! mod_std_impls {
         pub fn decode(buf: &[u8]) -> $T {
             assert_eq!(buf.len(), $Bytes);
             unsafe {
-                let mut tmp: $T = intrinsics::uninit();
-                intrinsics::copy_nonoverlapping(&mut tmp as *mut _ as *mut u8, buf.as_ptr(), $Bytes);
+                let mut tmp: $T = mem::uninitialized();
+                ptr::copy_nonoverlapping(&mut tmp as *mut _ as *mut u8, buf.as_ptr(), $Bytes);
                 Int::$DFunc(tmp)
             }
         }
@@ -584,7 +589,7 @@ macro_rules! mod_std_impls {
             assert_eq!(dst.len(), $Bytes);
             unsafe {
                 let tmp: $T = src.$EMeth();
-                intrinsics::copy_nonoverlapping(dst.as_mut_ptr(), &tmp as *const _ as *const u8, $Bytes);
+                ptr::copy_nonoverlapping(dst.as_mut_ptr(), &tmp as *const _ as *const u8, $Bytes);
             }
         }
 
