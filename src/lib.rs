@@ -184,7 +184,7 @@ pub mod u8 {
         }
     }
 
-    pub fn endode_hex(src: &[u8]) -> String {
+    pub fn encode_hex(src: &[u8]) -> String {
         static CHARS: &'static[u8] = b"0123456789abcdef";
         let mut v = Vec::with_capacity(src.len() * 2);
         for &byte in src.iter() {
