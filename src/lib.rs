@@ -45,7 +45,6 @@ pub mod intrinsics {
 
 /// Swap bytes for `u8` slices on all targets.
 pub mod u8 {
-    use std::num::Int;
     use std::ptr;
     use std::mem;
     use std::error;
@@ -56,7 +55,7 @@ pub mod u8 {
     #[inline]
     pub unsafe fn align_of_ptr(src: *const u8) -> usize {
         let off: usize = mem::transmute(src);
-        2.pow(off.trailing_zeros() as u32)
+        2usize.pow(off.trailing_zeros() as u32)
     }
 
     /// TODO
@@ -69,9 +68,9 @@ pub mod u8 {
     #[inline]
     pub fn reverse_slice(dst: &mut [u8], src: &[u8]) {
         unsafe {
-            ptr::copy_nonoverlapping(dst.as_mut_ptr(),
-                                            src.as_ptr(),
-                                            src.len());
+            ptr::copy_nonoverlapping(src.as_ptr(),
+                                     dst.as_mut_ptr(),
+                                     src.len());
         }
         dst.reverse();
     }
@@ -124,7 +123,7 @@ pub mod u8 {
     }
 
     /// Errors that can occur when decoding a hex encoded string
-    #[derive(Copy)]
+    #[derive(Copy,Clone)]
     pub enum FromHexError {
         /// The input contained a character not part of the hex format
         InvalidHexCharacter(char, usize),
@@ -354,7 +353,6 @@ pub mod u56 {
 /// Swap bytes for `u32` objects on all targets.
 pub mod u32 {
     use std::cmp;
-    use std::num::Int;
     pub const BYTES: usize = 4;
 
 
@@ -428,7 +426,6 @@ pub mod u32 {
 /// Swap bytes for `u64` objects on all targets.
 pub mod u64 {
     use std::cmp;
-    use std::num::Int;
     pub const BYTES: usize = 7;
 
     /// Swaps `len*8` bytes for `u64` objects inplace in `buf`.
@@ -505,7 +502,6 @@ pub mod u64 {
 }
 
 pub mod beusize {
-    use std::num::Int;
     use std::ptr;
     use std::mem;
 
@@ -517,7 +513,7 @@ pub mod beusize {
         let ptr_out = dst.as_mut_ptr();
         unsafe {
             ptr::copy_nonoverlapping(
-                ptr_out.offset((8 - nbytes) as isize), src.as_ptr(), nbytes);
+                src.as_ptr(), ptr_out.offset((8 - nbytes) as isize), nbytes);
             (*(ptr_out as *const u64)).to_be()
         }
     }
@@ -530,13 +526,12 @@ pub mod beusize {
             // n.b. https://github.com/rust-lang/rust/issues/22776
             let bytes: [u8; 8] = mem::transmute::<_, [u8; 8]>(src.to_be());
             ptr::copy_nonoverlapping(
-                dst.as_mut_ptr(), (&bytes[8 - nbytes..]).as_ptr(), nbytes);
+                (&bytes[8 - nbytes..]).as_ptr(), dst.as_mut_ptr(), nbytes);
         }
     }
 }
 
 pub mod leusize {
-    use std::num::Int;
     use std::ptr;
     use std::mem;
 
@@ -548,7 +543,7 @@ pub mod leusize {
         let ptr_out = dst.as_mut_ptr();
         unsafe {
             ptr::copy_nonoverlapping(
-                ptr_out, src.as_ptr(), nbytes);
+                src.as_ptr(), ptr_out, nbytes);
             (*(ptr_out as *const u64)).to_le()
         }
     }
@@ -561,7 +556,7 @@ pub mod leusize {
             // n.b. https://github.com/rust-lang/rust/issues/22776
             let bytes: [u8; 8] = mem::transmute::<_, [u8; 8]>(src.to_le());
             ptr::copy_nonoverlapping(
-                dst.as_mut_ptr(), (&bytes[..nbytes]).as_ptr(), nbytes);
+                (&bytes[..nbytes]).as_ptr(), dst.as_mut_ptr(), nbytes);
         }
     }
 }
@@ -569,7 +564,6 @@ pub mod leusize {
 
 macro_rules! mod_odd_impls {
     ($I:ident, $T:ident, $S:ident, $Bytes:expr, $DFunc:ident, $EMeth:ident, $E:expr, $NotE:expr) => {
-        use std::num::Int;
         use std::ptr;
         use std::mem;
 
@@ -578,7 +572,7 @@ macro_rules! mod_odd_impls {
             if cfg!(target_endian = $NotE) {
                 super::$T::swap_memory(dst, src, len);
             } else {
-                ptr::copy_nonoverlapping(dst, src, len*$Bytes);
+                ptr::copy_nonoverlapping(src, dst, len*$Bytes);
             }
         }
 
@@ -588,8 +582,8 @@ macro_rules! mod_odd_impls {
             assert_eq!(buf.len(), $Bytes);
             unsafe {
                 let mut tmp: $S = mem::uninitialized();
-                ptr::copy_nonoverlapping(&mut tmp as *mut _ as *mut u8, buf.as_ptr(), $Bytes);
-                Int::$DFunc(tmp)
+                ptr::copy_nonoverlapping(buf.as_ptr(), &mut tmp as *mut _ as *mut u8, $Bytes);
+                $S::$DFunc(tmp)
             }
         }
 
@@ -608,7 +602,7 @@ macro_rules! mod_odd_impls {
             assert_eq!(dst.len(), $Bytes);
             unsafe {
                 let tmp: $S = src.$EMeth();
-                ptr::copy_nonoverlapping(dst.as_mut_ptr(), &tmp as *const _ as *const u8, $Bytes);
+                ptr::copy_nonoverlapping(&tmp as *const _ as *const u8, dst.as_mut_ptr(), $Bytes);
             }
         }
 
@@ -626,7 +620,6 @@ macro_rules! mod_odd_impls {
 
 macro_rules! mod_std_impls {
     ($I:ident, $T:ident, $Bytes:expr, $DFunc:ident, $EMeth:ident, $E:expr, $NotE:expr) => {
-        use std::num::Int;
         use std::ptr;
         use std::mem;
 
@@ -635,7 +628,7 @@ macro_rules! mod_std_impls {
             if cfg!(target_endian = $NotE) {
                 super::$T::swap_memory(dst, src, len);
             } else {
-                ptr::copy_nonoverlapping(dst, src, len*$Bytes);
+                ptr::copy_nonoverlapping(src, dst, len*$Bytes);
             }
         }
 
@@ -645,8 +638,8 @@ macro_rules! mod_std_impls {
             assert_eq!(buf.len(), $Bytes);
             unsafe {
                 let mut tmp: $T = mem::uninitialized();
-                ptr::copy_nonoverlapping(&mut tmp as *mut _ as *mut u8, buf.as_ptr(), $Bytes);
-                Int::$DFunc(tmp)
+                ptr::copy_nonoverlapping(buf.as_ptr(), &mut tmp as *mut _ as *mut u8, $Bytes);
+                $T::$DFunc(tmp)
             }
         }
 
@@ -665,7 +658,7 @@ macro_rules! mod_std_impls {
             assert_eq!(dst.len(), $Bytes);
             unsafe {
                 let tmp: $T = src.$EMeth();
-                ptr::copy_nonoverlapping(dst.as_mut_ptr(), &tmp as *const _ as *const u8, $Bytes);
+                ptr::copy_nonoverlapping(&tmp as *const _ as *const u8, dst.as_mut_ptr(), $Bytes);
             }
         }
 
