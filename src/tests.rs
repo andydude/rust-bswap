@@ -156,7 +156,7 @@ fn test_u64_swap_memory_hi() {
 fn test_u64_swap_memory_inplace_hi() {
     let mut dst = [0u8; 8];
     let src: &[u8] = b"hi world";
-    ::std::slice::bytes::copy_memory(&mut dst, src);
+    ::std::slice::bytes::copy_memory(src, &mut dst);
     unsafe {
         super::u64::swap_memory_inplace(
             (&mut dst[..]).as_mut_ptr(),
@@ -185,7 +185,7 @@ fn test_u64_swap_memory_pangram() {
 fn test_u64_swap_memory_inplace_pangram() {
     let mut dst = [0u8; 32];
     let src: &[u8] = b"Five boxing wizards jump quickly";
-    ::std::slice::bytes::copy_memory(&mut dst, src);
+    ::std::slice::bytes::copy_memory(src, &mut dst);
     unsafe {
         super::u64::swap_memory_inplace(
             (&mut dst[..]).as_mut_ptr(),
@@ -215,7 +215,7 @@ fn test_u64_swap_memory_lorem_ipsum() {
 fn test_u64_swap_memory_inplace_lorem_ipsum() {
     let mut dst = [0u8; 160];
     let src: &[u8] = &LOREM_IPSUM[..160];
-    ::std::slice::bytes::copy_memory(&mut dst, src);
+    ::std::slice::bytes::copy_memory(src, &mut dst);
     unsafe {
         super::u64::swap_memory_inplace(
             (&mut dst[..]).as_mut_ptr(),
