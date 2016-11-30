@@ -1,51 +1,6 @@
-#![feature(core, test, str_char)]
-extern crate test;
-/*
-pub mod intrinsics {
-    use std::ptr;
-    use std::num::Int;
-
-    pub unsafe fn reverse_inplace<T: Int>(dst: *mut T, count: usize) {
-        for i in 0..count {
-            let (d, s) = (*dst.offset(0), *dst.offset(i));
-            (*dst.offset(i)) = (*src.offset(i)).swap_bytes();
-        }
-    }
-    pub unsafe fn reverse<T: Int>(dst: *mut T, src: *const T, count: usize) {
-        for i in 0..count {
-            (*dst.offset(i)) = (*src.offset(i)).swap_bytes();
-            dst = dst.offset(1);
-            src = src.offset(1);
-        }
-    }
-
-    //
-    pub unsafe fn reverse_nonoverlapping<T: Int>(dst: *mut T, src: *const T, count: usize) {
-    }
-
-    // bswap
-    pub unsafe fn swap_inplace<T: Int>(dst: *mut T, count: usize) {
-        for i in 0..count {
-            dst.offset(i) = dst.offset(i).swap_bytes();
-        }
-    }
-
-    // bswapmove
-    pub unsafe fn swap<T: Int>(dst: *mut T, src: *const T, count: usize) {
-        unsafe {
-            let diff: isize = mem::transmute(dst - src);
-
-        }
-    }
-    // bswapcopy
-    pub unsafe fn swap_nonoverlapping<T: Int>(dst: *mut T, src: *const T, count: usize) {
-    }
-}
- */
 
 /// Swap bytes for `u8` slices on all targets.
 pub mod u8 {
-    use std::num::Int;
     use std::ptr;
     use std::mem;
     use std::error;
@@ -56,7 +11,7 @@ pub mod u8 {
     #[inline]
     pub unsafe fn align_of_ptr(src: *const u8) -> usize {
         let off: usize = mem::transmute(src);
-        2.pow(off.trailing_zeros() as u32)
+        (2 as usize).pow(off.trailing_zeros() as u32)
     }
 
     /// TODO
@@ -69,8 +24,8 @@ pub mod u8 {
     #[inline]
     pub fn reverse_slice(dst: &mut [u8], src: &[u8]) {
         unsafe {
-            ptr::copy_nonoverlapping(dst.as_mut_ptr(),
-                                            src.as_ptr(),
+            ptr::copy_nonoverlapping(src.as_ptr(),
+			             dst.as_mut_ptr(),
                                             src.len());
         }
         dst.reverse();
@@ -124,7 +79,7 @@ pub mod u8 {
     }
 
     /// Errors that can occur when decoding a hex encoded string
-    #[derive(Copy)]
+    #[derive(Copy, Clone)]
     pub enum FromHexError {
         /// The input contained a character not part of the hex format
         InvalidHexCharacter(char, usize),
@@ -168,7 +123,7 @@ pub mod u8 {
                     buf >>= 4;
                     continue
                 }
-                _ => return Err(FromHexError::InvalidHexCharacter(src.char_at(idx), idx)),
+                _ => return Err(FromHexError::InvalidHexCharacter('?' /*src[idx]*/, idx)),
             }
 
             modulus += 1;
@@ -354,7 +309,6 @@ pub mod u56 {
 /// Swap bytes for `u32` objects on all targets.
 pub mod u32 {
     use std::cmp;
-    use std::num::Int;
     pub const BYTES: usize = 4;
 
 
@@ -428,7 +382,6 @@ pub mod u32 {
 /// Swap bytes for `u64` objects on all targets.
 pub mod u64 {
     use std::cmp;
-    use std::num::Int;
     pub const BYTES: usize = 7;
 
     /// Swaps `len*8` bytes for `u64` objects inplace in `buf`.
@@ -505,7 +458,6 @@ pub mod u64 {
 }
 
 pub mod beusize {
-    use std::num::Int;
     use std::ptr;
     use std::mem;
 
@@ -517,7 +469,7 @@ pub mod beusize {
         let ptr_out = dst.as_mut_ptr();
         unsafe {
             ptr::copy_nonoverlapping(
-                ptr_out.offset((8 - nbytes) as isize), src.as_ptr(), nbytes);
+                src.as_ptr(), ptr_out.offset((8 - nbytes) as isize), nbytes);
             (*(ptr_out as *const u64)).to_be()
         }
     }
@@ -530,13 +482,12 @@ pub mod beusize {
             // n.b. https://github.com/rust-lang/rust/issues/22776
             let bytes: [u8; 8] = mem::transmute::<_, [u8; 8]>(src.to_be());
             ptr::copy_nonoverlapping(
-                dst.as_mut_ptr(), (&bytes[8 - nbytes..]).as_ptr(), nbytes);
+                (&bytes[8 - nbytes..]).as_ptr(), dst.as_mut_ptr(), nbytes);
         }
     }
 }
 
 pub mod leusize {
-    use std::num::Int;
     use std::ptr;
     use std::mem;
 
@@ -548,7 +499,7 @@ pub mod leusize {
         let ptr_out = dst.as_mut_ptr();
         unsafe {
             ptr::copy_nonoverlapping(
-                ptr_out, src.as_ptr(), nbytes);
+                src.as_ptr(), ptr_out, nbytes);
             (*(ptr_out as *const u64)).to_le()
         }
     }
@@ -561,7 +512,7 @@ pub mod leusize {
             // n.b. https://github.com/rust-lang/rust/issues/22776
             let bytes: [u8; 8] = mem::transmute::<_, [u8; 8]>(src.to_le());
             ptr::copy_nonoverlapping(
-                dst.as_mut_ptr(), (&bytes[..nbytes]).as_ptr(), nbytes);
+	        (&bytes[..nbytes]).as_ptr(), dst.as_mut_ptr(), nbytes);
         }
     }
 }
@@ -569,7 +520,6 @@ pub mod leusize {
 
 macro_rules! mod_odd_impls {
     ($I:ident, $T:ident, $S:ident, $Bytes:expr, $DFunc:ident, $EMeth:ident, $E:expr, $NotE:expr) => {
-        use std::num::Int;
         use std::ptr;
         use std::mem;
 
@@ -589,7 +539,7 @@ macro_rules! mod_odd_impls {
             unsafe {
                 let mut tmp: $S = mem::uninitialized();
                 ptr::copy_nonoverlapping(&mut tmp as *mut _ as *mut u8, buf.as_ptr(), $Bytes);
-                Int::$DFunc(tmp)
+                $T::$DFunc(tmp)
             }
         }
 
@@ -608,7 +558,7 @@ macro_rules! mod_odd_impls {
             assert_eq!(dst.len(), $Bytes);
             unsafe {
                 let tmp: $S = src.$EMeth();
-                ptr::copy_nonoverlapping(dst.as_mut_ptr(), &tmp as *const _ as *const u8, $Bytes);
+                ptr::copy_nonoverlapping(&tmp as *const _ as *const u8, dst.as_mut_ptr(), $Bytes);
             }
         }
 
@@ -626,7 +576,6 @@ macro_rules! mod_odd_impls {
 
 macro_rules! mod_std_impls {
     ($I:ident, $T:ident, $Bytes:expr, $DFunc:ident, $EMeth:ident, $E:expr, $NotE:expr) => {
-        use std::num::Int;
         use std::ptr;
         use std::mem;
 
@@ -635,7 +584,7 @@ macro_rules! mod_std_impls {
             if cfg!(target_endian = $NotE) {
                 super::$T::swap_memory(dst, src, len);
             } else {
-                ptr::copy_nonoverlapping(dst, src, len*$Bytes);
+                ptr::copy_nonoverlapping(src, dst, len*$Bytes);
             }
         }
 
@@ -645,8 +594,8 @@ macro_rules! mod_std_impls {
             assert_eq!(buf.len(), $Bytes);
             unsafe {
                 let mut tmp: $T = mem::uninitialized();
-                ptr::copy_nonoverlapping(&mut tmp as *mut _ as *mut u8, buf.as_ptr(), $Bytes);
-                Int::$DFunc(tmp)
+                ptr::copy_nonoverlapping(buf.as_ptr(), &mut tmp as *mut _ as *mut u8, $Bytes);
+                $T::$DFunc(tmp)
             }
         }
 
@@ -665,7 +614,7 @@ macro_rules! mod_std_impls {
             assert_eq!(dst.len(), $Bytes);
             unsafe {
                 let tmp: $T = src.$EMeth();
-                ptr::copy_nonoverlapping(dst.as_mut_ptr(), &tmp as *const _ as *const u8, $Bytes);
+                ptr::copy_nonoverlapping(&tmp as *const _ as *const u8, dst.as_mut_ptr(), $Bytes);
             }
         }
 
@@ -684,29 +633,29 @@ macro_rules! mod_std_impls {
 /// Swap bytes for `u16` objects only on little-endian targets, does nothing on big-endian targets.
 pub mod beu16 { mod_std_impls!(be, u16, 2, from_be, to_be, "big", "little"); }
 /// Swap bytes for `[u8; 3]` objects only on little-endian targets, does nothing on big-endian targets.
-pub mod beu24 { mod_odd_impls!(be, u24, u32, 3, from_be, to_be, "big", "little"); }
+//pub mod beu24 { mod_odd_impls!(be, u24, u32, 3, from_be, to_be, "big", "little"); }
 /// Swap bytes for `u32` objects only on little-endian targets, does nothing on big-endian targets.
 pub mod beu32 { mod_std_impls!(be, u32, 4, from_be, to_be, "big", "little"); }
 /// Swap bytes for `[u8; 5]` objects only on little-endian targets, does nothing on big-endian targets.
-pub mod beu40 { mod_odd_impls!(be, u40, u64, 5, from_be, to_be, "big", "little"); }
+//pub mod beu40 { mod_odd_impls!(be, u40, u64, 5, from_be, to_be, "big", "little"); }
 /// Swap bytes for `[u8; 6]` objects only on little-endian targets, does nothing on big-endian targets.
-pub mod beu48 { mod_odd_impls!(be, u48, u64, 6, from_be, to_be, "big", "little"); }
+//pub mod beu48 { mod_odd_impls!(be, u48, u64, 6, from_be, to_be, "big", "little"); }
 /// Swap bytes for `[u8; 7]` objects only on little-endian targets, does nothing on big-endian targets.
-pub mod beu56 { mod_odd_impls!(be, u56, u64, 7, from_be, to_be, "big", "little"); }
+//pub mod beu56 { mod_odd_impls!(be, u56, u64, 7, from_be, to_be, "big", "little"); }
 /// Swap bytes for `u64` objects only on little-endian targets, does nothing on big-endian targets.
 pub mod beu64 { mod_std_impls!(be, u64, 8, from_be, to_be, "big", "little"); }
 /// Swap bytes for `u16` objects only on big-endian targets, does nothing on little-endian targets.
 pub mod leu16 { mod_std_impls!(le, u16, 2, from_le, to_le, "little", "big"); }
 /// Swap bytes for `[u8; 3]` objects only on big-endian targets, does nothing on little-endian targets.
-pub mod leu24 { mod_odd_impls!(le, u24, u32, 3, from_le, to_le, "little", "big"); }
+//pub mod leu24 { mod_odd_impls!(le, u24, u32, 3, from_le, to_le, "little", "big"); }
 /// Swap bytes for `u32` objects only on big-endian targets, does nothing on little-endian targets.
 pub mod leu32 { mod_std_impls!(le, u32, 4, from_le, to_le, "little", "big"); }
 /// Swap bytes for `[u8; 5]` objects only on big-endian targets, does nothing on little-endian targets.
-pub mod leu40 { mod_odd_impls!(le, u40, u64, 5, from_le, to_le, "little", "big"); }
+//pub mod leu40 { mod_odd_impls!(le, u40, u64, 5, from_le, to_le, "little", "big"); }
 /// Swap bytes for `[u8; 6]` objects only on big-endian targets, does nothing on little-endian targets.
-pub mod leu48 { mod_odd_impls!(le, u48, u64, 6, from_le, to_le, "little", "big"); }
+//pub mod leu48 { mod_odd_impls!(le, u48, u64, 6, from_le, to_le, "little", "big"); }
 /// Swap bytes for `[u8; 7]` objects only on big-endian targets, does nothing on little-endian targets.
-pub mod leu56 { mod_odd_impls!(le, u56, u64, 7, from_le, to_le, "little", "big"); }
+//pub mod leu56 { mod_odd_impls!(le, u56, u64, 7, from_le, to_le, "little", "big"); }
 /// Swap bytes for `u64` objects only on big-endian targets, does nothing on little-endian targets.
 pub mod leu64 { mod_std_impls!(le, u64, 8, from_le, to_le, "little", "big"); }
 
