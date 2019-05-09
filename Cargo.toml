@@ -1,6 +1,6 @@
 [package]
 name = "bswap"
-version = "0.4.0"
+version = "1.0.0"
 authors = ["Andrew Robbins <and_j_rob@yahoo.com>"]
 license = "MIT"
 homepage = "https://andydude.github.io/rust-bswap/bswap/index.html"

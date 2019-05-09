@@ -518,61 +518,61 @@ pub mod leusize {
 }
 
 
-macro_rules! mod_odd_impls {
-    ($I:ident, $T:ident, $S:ident, $Bytes:expr, $DFunc:ident, $EMeth:ident, $E:expr, $NotE:expr) => {
-        use std::ptr;
-        use std::mem;
-
-        #[inline]
-        unsafe fn swap_memory(dst: *mut u8, src: *const u8, len: usize) {
-            if cfg!(target_endian = $NotE) {
-                super::$T::swap_memory(dst, src, len);
-            } else {
-                ptr::copy_nonoverlapping(dst, src, len*$Bytes);
-            }
-        }
-
-        /// Decodes $E-endian bytes to a native-endian $T object.
-        #[inline]
-        pub fn decode(buf: &[u8]) -> $S {
-            assert_eq!(buf.len(), $Bytes);
-            unsafe {
-                let mut tmp: $S = mem::uninitialized();
-                ptr::copy_nonoverlapping(&mut tmp as *mut _ as *mut u8, buf.as_ptr(), $Bytes);
-                $T::$DFunc(tmp)
-            }
-        }
-
-        /// Decodes $E-endian bytes to a slice of native-endian $T objects.
-        #[inline]
-        pub fn decode_slice(dst: &mut [[u8; $Bytes]], src: &[u8]) {
-            assert_eq!(dst.len()*$Bytes, src.len());
-            unsafe {
-                swap_memory(dst.as_mut_ptr() as *mut u8, src.as_ptr(), dst.len());
-            }
-        }
-
-        /// Encodes a native-endian $T object to $E-endian bytes.
-        #[inline]
-        pub fn encode(dst: &mut [u8], src: $S) {
-            assert_eq!(dst.len(), $Bytes);
-            unsafe {
-                let tmp: $S = src.$EMeth();
-                ptr::copy_nonoverlapping(&tmp as *const _ as *const u8, dst.as_mut_ptr(), $Bytes);
-            }
-        }
-
-        /// Encodes a slice of native-endian $T objects to $E-endian bytes.
-        #[inline]
-        pub fn encode_slice(dst: &mut [u8], src: &[[u8; $Bytes]]) {
-            assert_eq!(dst.len(), src.len()*$Bytes);
-            unsafe {
-                swap_memory(dst.as_mut_ptr(), src.as_ptr() as *const u8, src.len());
-            }
-        }
-
-    }
-}
+//macro_rules! mod_odd_impls {
+//    ($I:ident, $T:ident, $S:ident, $Bytes:expr, $DFunc:ident, $EMeth:ident, $E:expr, $NotE:expr) => {
+//        use std::ptr;
+//        use std::mem;
+//
+//        #[inline]
+//        unsafe fn swap_memory(dst: *mut u8, src: *const u8, len: usize) {
+//            if cfg!(target_endian = $NotE) {
+//                super::$T::swap_memory(dst, src, len);
+//            } else {
+//                ptr::copy_nonoverlapping(dst, src, len*$Bytes);
+//            }
+//        }
+//
+//        /// Decodes $E-endian bytes to a native-endian $T object.
+//        #[inline]
+//        pub fn decode(buf: &[u8]) -> $S {
+//            assert_eq!(buf.len(), $Bytes);
+//            unsafe {
+//                let mut tmp: $S = mem::uninitialized();
+//                ptr::copy_nonoverlapping(&mut tmp as *mut _ as *mut u8, buf.as_ptr(), $Bytes);
+//                $T::$DFunc(tmp)
+//            }
+//        }
+//
+//        /// Decodes $E-endian bytes to a slice of native-endian $T objects.
+//        #[inline]
+//        pub fn decode_slice(dst: &mut [[u8; $Bytes]], src: &[u8]) {
+//            assert_eq!(dst.len()*$Bytes, src.len());
+//            unsafe {
+//                swap_memory(dst.as_mut_ptr() as *mut u8, src.as_ptr(), dst.len());
+//            }
+//        }
+//
+//        /// Encodes a native-endian $T object to $E-endian bytes.
+//        #[inline]
+//        pub fn encode(dst: &mut [u8], src: $S) {
+//            assert_eq!(dst.len(), $Bytes);
+//            unsafe {
+//                let tmp: $S = src.$EMeth();
+//                ptr::copy_nonoverlapping(&tmp as *const _ as *const u8, dst.as_mut_ptr(), $Bytes);
+//            }
+//        }
+//
+//        /// Encodes a slice of native-endian $T objects to $E-endian bytes.
+//        #[inline]
+//        pub fn encode_slice(dst: &mut [u8], src: &[[u8; $Bytes]]) {
+//            assert_eq!(dst.len(), src.len()*$Bytes);
+//            unsafe {
+//                swap_memory(dst.as_mut_ptr(), src.as_ptr() as *const u8, src.len());
+//            }
+//        }
+//
+//    }
+//}
 
 macro_rules! mod_std_impls {
     ($I:ident, $T:ident, $Bytes:expr, $DFunc:ident, $EMeth:ident, $E:expr, $NotE:expr) => {
